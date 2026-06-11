@@ -1,0 +1,32 @@
+[
+  {
+    "avg_input_tokens": 93.46,
+    "batch_total_cost_usd": 5.2191,
+    "expected_reasoning_output_tokens": 256,
+    "expected_visible_output_tokens": 256,
+    "input_cost_usd": 0.3082,
+    "model": "gpt-5.4",
+    "output_cost_usd": 10.1299,
+    "p50_input_tokens": 90.0,
+    "p95_input_tokens": 136.0,
+    "samples": 1319,
+    "total_cost_usd": 10.4381,
+    "total_input_tokens": 123274,
+    "total_output_tokens": 675328
+  },
+  {
+    "avg_input_tokens": 93.46,
+    "batch_total_cost_usd": 10.4381,
+    "expected_reasoning_output_tokens": 256,
+    "expected_visible_output_tokens": 256,
+    "input_cost_usd": 0.6164,
+    "model": "gpt-5.5",
+    "output_cost_usd": 20.2598,
+    "p50_input_tokens": 90.0,
+    "p95_input_tokens": 136.0,
+    "samples": 1319,
+    "total_cost_usd": 20.8762,
+    "total_input_tokens": 123274,
+    "total_output_tokens": 675328
+  }
+]

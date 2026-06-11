@@ -1,0 +1,142 @@
+{
+  "aggregates": [
+    {
+      "completed_requests_per_minute": 23.36,
+      "metrics": {
+        "end_to_end_latency_ms": {
+          "count": 5,
+          "max": 3733.22,
+          "mean": 3254.78,
+          "min": 2658.52,
+          "p25": 2980.64,
+          "p50": 3433.24,
+          "p75": 3468.26,
+          "p90": 3733.22,
+          "p95": 3733.22,
+          "p99": 3733.22,
+          "stddev": 429.25
+        },
+        "number_input_tokens": {
+          "count": 5,
+          "max": 56,
+          "mean": 53.4,
+          "min": 49,
+          "p25": 53,
+          "p50": 53,
+          "p75": 56,
+          "p90": 56,
+          "p95": 56,
+          "p99": 56,
+          "stddev": 2.88
+        },
+        "number_output_tokens": {
+          "count": 5,
+          "max": 129,
+          "mean": 98.4,
+          "min": 80,
+          "p25": 81,
+          "p50": 93,
+          "p75": 109,
+          "p90": 129,
+          "p95": 129,
+          "p99": 129,
+          "stddev": 20.73
+        },
+        "number_reasoning_tokens": {
+          "count": 5,
+          "max": 26,
+          "mean": 17.0,
+          "min": 0,
+          "p25": 18,
+          "p50": 18,
+          "p75": 23,
+          "p90": 26,
+          "p95": 26,
+          "p99": 26,
+          "stddev": 10.1
+        },
+        "request_output_throughput_token_per_s": {
+          "count": 5,
+          "max": 43.28,
+          "mean": 31.17,
+          "min": 23.07,
+          "p25": 23.59,
+          "p50": 24.91,
+          "p75": 41.0,
+          "p90": 43.28,
+          "p95": 43.28,
+          "p99": 43.28,
+          "stddev": 10.07
+        },
+        "time_to_first_byte_ms": {
+          "count": 5,
+          "max": 373.35,
+          "mean": 311.74,
+          "min": 281.32,
+          "p25": 293.71,
+          "p50": 300.46,
+          "p75": 309.88,
+          "p90": 373.35,
+          "p95": 373.35,
+          "p99": 373.35,
+          "stddev": 35.98
+        },
+        "time_to_first_token_ms": {
+          "count": 5,
+          "max": 2645.04,
+          "mean": 1571.37,
+          "min": 1020.37,
+          "p25": 1136.54,
+          "p50": 1324.39,
+          "p75": 1730.53,
+          "p90": 2645.04,
+          "p95": 2645.04,
+          "p99": 2645.04,
+          "stddev": 657.98
+        }
+      },
+      "model": "openai.gpt-5.5",
+      "number_completed_requests": 5,
+      "number_errored_requests": 0,
+      "overall_output_throughput_token_per_s": 30.23,
+      "provider": "bedrock"
+    }
+  ],
+  "summary": [
+    {
+      "estimated_openai_cost_usd_total": 0.016095,
+      "failed_runs": 0,
+      "input_tokens_avg": 53.4,
+      "input_tokens_p50": 53,
+      "input_tokens_p90": 56,
+      "input_tokens_p95": 56,
+      "model": "openai.gpt-5.5",
+      "output_tokens_avg": 98.4,
+      "output_tokens_p50": 93,
+      "output_tokens_p90": 129,
+      "output_tokens_p95": 129,
+      "output_tokens_per_second_avg": 31.17,
+      "output_tokens_per_second_p50": 24.91,
+      "output_tokens_per_second_p90": 43.28,
+      "output_tokens_per_second_p95": 43.28,
+      "provider": "bedrock",
+      "reasoning_tokens_avg": 17.0,
+      "reasoning_tokens_p50": 18,
+      "reasoning_tokens_p90": 26,
+      "reasoning_tokens_p95": 26,
+      "successful_runs": 5,
+      "total_ms_avg": 3254.78,
+      "total_ms_p50": 3433.24,
+      "total_ms_p90": 3733.22,
+      "total_ms_p95": 3733.22,
+      "ttfb_ms_avg": 311.74,
+      "ttfb_ms_p50": 300.46,
+      "ttfb_ms_p90": 373.35,
+      "ttfb_ms_p95": 373.35,
+      "ttft_ms_avg": 1571.37,
+      "ttft_ms_p50": 1324.39,
+      "ttft_ms_p90": 2645.04,
+      "ttft_ms_p95": 2645.04
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+[project]
+name = "gpt-5-bedrock-openai-benchmark"
+version = "0.1.0"
+description = "Latency and token-cost benchmarks for OpenAI-compatible GPT-5.5 endpoints on Bedrock Mantle and OpenAI."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.40.21",
+    "httpx>=0.28.1",
+    "python-dotenv>=1.1.1",
+    "tiktoken>=0.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.12.11",
+]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["I", "E", "F"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+testpaths = ["tests"]
