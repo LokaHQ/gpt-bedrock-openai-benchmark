@@ -1000,34 +1000,32 @@
           </p>
 
           <p>
-            A launch is easy to celebrate and hard to substantiate. So before we built
-            anything, we asked the foundational question: does routing GPT-5.5 through
-            Amazon Bedrock change the model you get? We ran the full GSM8K test split
-            (1,319 questions) through both provider paths at three reasoning levels and
-            compared accuracy, latency, throughput, and reliability head to head. The
-            benchmark confirmed the same answer quality, faster serving, and zero failures
-            on Bedrock. Only then did we move to the build phase.
+            A launch is easy to celebrate and hard to substantiate. So this post covers
+            two things:
           </p>
 
-          <p>
-            That build phase is a report grounded in what we actually shipped. We used
-            Loka's production agent architecture and delivery patterns to stand up
-            <em>two</em> copilots for two of the most heavily regulated industries we work
-            in. The point is not to expose implementation mechanics; it is to show how
-            authentication, scoped data access, observability, guardrails, deployment, and
-            human review can travel across use cases:
-          </p>
-
-          <ul>
+          <ol>
             <li>
-              <strong>FSI Evidence Copilot</strong> (financial services): prepares evidence
-              packets for small-business lending, KYC refresh, and AML alert review.
+              <strong>A benchmark: GPT-5.5 on Bedrock vs. the native OpenAI API.</strong>
+              Before we built anything, we asked the foundational question: does routing
+              GPT-5.5 through Amazon Bedrock change the model you get? We ran the full
+              GSM8K test split (1,319 questions) through both provider paths at three
+              reasoning levels and compared accuracy, latency, throughput, and reliability
+              head to head. The benchmark confirmed the same answer quality, faster
+              serving, and zero failures on Bedrock.
             </li>
             <li>
-              <strong>Clinical Evidence Copilot</strong> (healthcare &amp; life sciences):
-              prepares synthetic-patient evidence packets for coverage and medication reviews.
+              <strong>Two regulated-industry copilots, built on the path that passed.</strong>
+              Using Loka's production agent architecture and delivery patterns, we stood up
+              the <strong>FSI Evidence Copilot</strong> (financial services: evidence
+              packets for small-business lending, KYC refresh, and AML alert review) and
+              the <strong>Clinical Evidence Copilot</strong> (healthcare &amp; life
+              sciences: synthetic-patient evidence packets for coverage and medication
+              reviews). The point is not to expose implementation mechanics; it is to show
+              how authentication, scoped data access, observability, guardrails,
+              deployment, and human review can travel across use cases.
             </li>
-          </ul>
+          </ol>
 
           <p>
             They share production obligations: governed access, traceability, guardrails,
@@ -1361,6 +1359,20 @@
             </p>
           </div>
 
+          <!-- ═══════════════════ 3. ARCHITECTURE ═══════════════════ -->
+
+          <h2 id="template">
+            Production service pattern
+            <a class="heading-anchor" href="#template" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            That was the measurement half of this post. The benchmark validated the model
+            path, with the same answer quality, faster serving, and zero failures on
+            Bedrock, so from here on we switch from measuring to building: everything below
+            is about the two copilots we shipped on that path.
+          </p>
+
           <h3>What gets easier with OpenAI on Bedrock</h3>
 
           <p>
@@ -1396,12 +1408,7 @@
             </tbody>
           </table>
 
-          <!-- ═══════════════════ 3. ARCHITECTURE ═══════════════════ -->
-
-          <h2 id="template">
-            Production service pattern
-            <a class="heading-anchor" href="#template" aria-label="Link to section">#</a>
-          </h2>
+          <h3>One governed pattern, two copilots</h3>
 
           <p>
             The healthcare and financial-services demos share something more useful than a
