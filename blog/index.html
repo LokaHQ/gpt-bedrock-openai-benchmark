@@ -1276,13 +1276,26 @@
           </ul>
 
           <p>
-            And a fourth cent, offered as pure speculation: AWS has spent years building its
-            own inference silicon (Trainium and Inferentia), and it would be unsurprising if
-            the Bedrock serving stack for these models leans on hardware and capacity that
-            OpenAI's shared fleet doesn't have. Neither provider documents what actually
-            serves these endpoints, so we can't verify it — but "same weights, different
-            metal" would be consistent with everything we measured, particularly the decode
-            throughput gap.
+            There is also a hardware angle. Amazon's
+            <a href="https://www.aboutamazon.com/news/aws/amazon-open-ai-strategic-partnership-investment">$50&nbsp;billion investment in OpenAI</a>
+            comes with a commitment of
+            <a href="https://www.tomshardware.com/tech-industry/amazon-invests-50-billion-in-openai">roughly 2&nbsp;gigawatts of Trainium capacity</a>,
+            and in March AWS and Cerebras
+            <a href="https://press.aboutamazon.com/aws/2026/3/aws-and-cerebras-collaboration-aims-to-set-a-new-standard-for-ai-inference-speed-and-performance-in-the-cloud">announced a serving architecture</a>
+            that splits inference across purpose-built silicon: Trainium handles the
+            parallel prefill phase, Cerebras wafer-scale chips handle the bandwidth-hungry
+            decode phase. AWS is pitching it as "the fastest AI inference available through
+            Amazon Bedrock." We don't know what hardware served our requests, since neither
+            company says. The only public speed figure for OpenAI on Cerebras —
+            <a href="https://openai.com/index/introducing-gpt-5-3-codex-spark/">over 1,000 tokens per second</a>
+            — comes from a much smaller model built specifically for that hardware, so it
+            says little about what GPT-5.5 would do there. The more useful signal is AWS's
+            own framing: the announcement describes the new stack as launching months later
+            and as "an order of magnitude faster" than what Bedrock serves today. A 20–30%
+            throughput edge is not an order of magnitude, so whatever served our requests,
+            the new silicon doesn't explain the gap we measured. What it does tell you is
+            where this is going: AWS is building Bedrock to be the fastest place to run
+            these models, and the advantage we measured is probably the early version of it.
           </p>
 
           <div class="callout">
@@ -1293,7 +1306,11 @@
               different workload: Bedrock at 52.3 output tok/s versus OpenAI at 50.5, with
               materially lower end-to-end latency on their xhigh measurement (~76 s vs ~100 s
               to first answer token), summarized on their page as "Amazon offers the best
-              performance with both the highest speed and lowest latency." The flip side is
+              performance with both the highest speed and lowest latency." Their
+              <a href="https://artificialanalysis.ai/models/gpt-5-5-medium/providers">medium-effort page</a>
+              shows the same shape: 53.8 vs 48.3 tok/s and 7.9 s vs 9.5 s to first answer
+              token — independently matching the direction of every latency and throughput
+              number we measured. The flip side is
               also theirs: OpenAI's list price is slightly lower ($5.00/$30.00 vs $5.50/$33.00
               per 1M input/output tokens), so the trade is roughly 10% on price for the faster,
               more reliable path that also lives inside AWS governance.
@@ -1981,8 +1998,26 @@
             </li>
             <li>
               Artificial Analysis (2026). <em>GPT-5.5: API provider comparison.</em>
-              Independent cross-provider measurements of output speed, latency, and price.
-              <a href="https://artificialanalysis.ai/models/gpt-5-5/providers">artificialanalysis.ai</a>
+              Independent cross-provider measurements of output speed, latency, and price,
+              at <a href="https://artificialanalysis.ai/models/gpt-5-5/providers">xhigh</a>
+              and <a href="https://artificialanalysis.ai/models/gpt-5-5-medium/providers">medium</a>
+              reasoning effort.
+            </li>
+            <li>
+              Amazon (2026). <em>OpenAI and Amazon announce strategic partnership.</em>
+              The $50B investment and the ~2 GW Trainium capacity commitment.
+              <a href="https://www.aboutamazon.com/news/aws/amazon-open-ai-strategic-partnership-investment">aboutamazon.com</a>
+            </li>
+            <li>
+              Amazon (2026). <em>AWS and Cerebras collaboration aims to set a new standard
+              for AI inference speed and performance in the cloud.</em>
+              Disaggregated inference: Trainium prefill, Cerebras wafer-scale decode.
+              <a href="https://press.aboutamazon.com/aws/2026/3/aws-and-cerebras-collaboration-aims-to-set-a-new-standard-for-ai-inference-speed-and-performance-in-the-cloud">press.aboutamazon.com</a>
+            </li>
+            <li>
+              The New Stack (2026). <em>AWS lands OpenAI on Bedrock, but Trainium is the
+              real story.</em> Analysis of the silicon strategy behind the Bedrock launch.
+              <a href="https://thenewstack.io/openai-bedrock-trainium-silicon/">thenewstack.io</a>
             </li>
             <li>
               OpenAI (2026). <em>Codex for every role, tool, and workflow.</em>
