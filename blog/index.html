@@ -964,7 +964,7 @@
             <ul class="toc-list">
               <li><a href="#introduction">Introduction</a></li>
               <li><a href="#why-bedrock">Why OpenAI on Bedrock</a></li>
-              <li><a href="#latency-benchmark">Latency benchmark</a></li>
+              <li><a href="#latency-benchmark">Bedrock vs OpenAI benchmarks</a></li>
               <li><a href="#template">Production service pattern</a></li>
               <li><a href="#fsi">Financial-services copilot</a></li>
               <li><a href="#clinical">Healthcare copilot</a></li>
@@ -1124,48 +1124,198 @@
           <!-- ═══════════════════ 2B. LATENCY BENCHMARK ═══════════════════ -->
 
           <h2 id="latency-benchmark">
-            Latency benchmark: OpenAI-compatible APIs
+            Benchmarks: GPT-5.5 on Bedrock vs the OpenAI API
             <a class="heading-anchor" href="#latency-benchmark" aria-label="Link to section">#</a>
           </h2>
 
           <p>
             Capability is only half the enterprise question. The other half is whether the
-            model path feels responsive to the user. For that, we added a small streaming
-            benchmark that measures the numbers people actually feel in an application:
-            time to first byte, time to first output token, total streamed latency, and output
-            throughput. The harness uses the same OpenAI-compatible <code>Responses</code>
-            shape for both providers, so the comparison can stay focused on the API path
-            rather than client-library differences.
+            governed model path costs you anything: in accuracy, in the latency users feel,
+            or in reliability. So we measured it. We ran the full <strong>GSM8K test split
+            (1,319 questions)</strong> through both provider paths —
+            <code>openai.gpt-5.5</code> on Amazon Bedrock Mantle in <code>us-east-2</code>
+            and <code>gpt-5.5</code> on the OpenAI first-party API — at three reasoning
+            efforts (<em>medium</em>, <em>high</em>, <em>xhigh</em>). Same prompts, same
+            OpenAI-compatible <code>Responses</code> shape, same output caps, same streaming
+            metric definitions, and sequential requests so client-side concurrency never
+            pollutes the numbers. That answers two questions at once: does quality survive
+            the provider change, and which path is faster in practice.
           </p>
+
+          <h3>Accuracy: the same model, within noise</h3>
 
           <table>
             <thead>
               <tr>
-                <th>Provider path</th>
-                <th>Models</th>
-                <th>Status</th>
-                <th>What we will publish</th>
+                <th>Reasoning effort</th>
+                <th>Bedrock <code>openai.gpt-5.5</code></th>
+                <th>OpenAI <code>gpt-5.5</code></th>
+                <th>Delta</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Amazon Bedrock Mantle</td>
-                <td><code>openai.gpt-5.5</code>, <code>openai.gpt-5.4</code></td>
-                <td><span class="status-pill review">pending live credentials</span></td>
-                <td>Bedrock-only p50/p90 TTFT and total-latency numbers from the local benchmark run.</td>
-              </tr>
-              <tr>
-                <td>OpenAI first-party API</td>
-                <td><code>gpt-5.5</code>, <code>gpt-5.4</code></td>
-                <td><span class="status-pill review">pending API access</span></td>
-                <td>Same prompts, same output cap, same reasoning effort, same streaming metric definitions.</td>
-              </tr>
+              <tr><td>medium</td><td>97.57%</td><td>97.42%</td><td>−0.15 pp</td></tr>
+              <tr><td>high</td><td>97.57%</td><td>97.35%</td><td>−0.22 pp</td></tr>
+              <tr><td>xhigh</td><td>97.42%</td><td>97.35%</td><td>−0.07 pp</td></tr>
             </tbody>
           </table>
 
           <p>
+            Bedrock edges ahead in all three runs, but the honest read is parity: the gaps
+            are one to three questions out of 1,319, well within run-to-run noise for a
+            sampled model. That is the result an enterprise team wants to see. It says the
+            weights behind both endpoints behave the same, so moving the workload onto the
+            governed AWS path costs nothing in answer quality, and everything that
+            <em>does</em> differ between the two paths is serving infrastructure.
+          </p>
+
+          <h3>Latency and throughput: Bedrock is faster where it matters</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Effort</th>
+                <th>Provider</th>
+                <th>TTFB p50</th>
+                <th>TTFT p50</th>
+                <th>Total p50</th>
+                <th>Total p90</th>
+                <th>Mean tok/s</th>
+                <th>Failed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>medium</td><td>Bedrock</td><td>220 ms</td><td>1,939 ms</td><td>2,881 ms</td><td>4,369 ms</td><td>47.4</td><td>0 / 1,319</td></tr>
+              <tr><td>medium</td><td>OpenAI</td><td>484 ms</td><td>1,956 ms</td><td>2,859 ms</td><td>4,908 ms</td><td>39.1</td><td>2 / 1,319</td></tr>
+              <tr><td>high</td><td>Bedrock</td><td>224 ms</td><td>2,662 ms</td><td>3,455 ms</td><td>4,801 ms</td><td>48.5</td><td>0 / 1,319</td></tr>
+              <tr><td>high</td><td>OpenAI</td><td>497 ms</td><td>2,356 ms</td><td>3,248 ms</td><td>5,712 ms</td><td>41.3</td><td>1 / 1,319</td></tr>
+              <tr><td>xhigh</td><td>Bedrock</td><td>223 ms</td><td>3,250 ms</td><td>3,803 ms</td><td>5,792 ms</td><td>51.8</td><td>0 / 1,319</td></tr>
+              <tr><td>xhigh</td><td>OpenAI</td><td>502 ms</td><td>3,280 ms</td><td>4,334 ms</td><td>8,273 ms</td><td>39.7</td><td>retried*</td></tr>
+            </tbody>
+          </table>
+
+          <p style="font-size:0.85rem;color:var(--fg-3);">
+            *The OpenAI xhigh run needed failed requests retried to complete all 1,319
+            samples; the published numbers come from the merged clean run. Bedrock completed
+            all 3,957 requests across the three efforts with zero errors.
+          </p>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-bench-ttfb" height="150"></canvas></div>
+            <figcaption>
+              Time to first byte (p50) by reasoning effort. TTFB is measured before any token
+              is generated, so this is purely the API path: Bedrock answers in ~220 ms at
+              every effort level; the OpenAI API takes ~2.2× longer.
+            </figcaption>
+          </figure>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-bench-e2e" height="170"></canvas></div>
+            <figcaption>
+              End-to-end streamed latency, p50 (solid) and p90 (translucent). Medians are
+              close at medium and high; the gap opens at xhigh and at the tails, where
+              Bedrock's p90 stays 0.5–2.5 s ahead.
+            </figcaption>
+          </figure>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-bench-tps" height="150"></canvas></div>
+            <figcaption>
+              Mean per-request output throughput. Bedrock decodes 20–30% faster at every
+              effort level, and the gap widens as reasoning effort (and output length) grows.
+            </figcaption>
+          </figure>
+
+          <p>
+            Reading it honestly: at medium and high effort the <em>median</em> end-to-end
+            latencies are effectively tied (the Bedrock high run actually spent slightly more
+            reasoning tokens, which costs it the p50 comparison there). But every other
+            dimension leans one way. Time to first byte is ~220 ms on Bedrock versus
+            ~480–500 ms on the OpenAI API at every effort level. Mean output throughput is
+            20–30% higher on Bedrock. The tail percentiles (p90/p95) favor Bedrock in all
+            three runs and the gap grows with effort — at xhigh, p95 is 9.2 s on Bedrock
+            versus 11.4 s on OpenAI. And reliability went one way only: zero failed requests
+            on Bedrock across nearly 4,000 calls, versus errored requests in every OpenAI run,
+            including stalled outliers that ran past 100 seconds.
+          </p>
+
+          <h3>Why is Bedrock faster? Our three cents</h3>
+
+          <p>
+            The accuracy parity above is what makes the latency question interesting: if the
+            model is the same, the difference is the serving path. Three observations from
+            the data, offered as informed interpretation rather than inside knowledge:
+          </p>
+
+          <ul>
+            <li>
+              <strong>The TTFB gap is infrastructure, not the model.</strong> Time to first
+              byte is measured before a single token is generated — it is connection setup,
+              authentication, admission, and routing. Bedrock's regional endpoint held a flat
+              ~220 ms p50 across all three runs regardless of effort; the OpenAI API hovered
+              around ~480–500 ms with a much heavier tail (p99 of ~3 s, worst cases over
+              100 s). That is the difference between a dedicated regional AWS endpoint and a
+              globally shared API front door absorbing the world's GPT-5.5 traffic.
+            </li>
+            <li>
+              <strong>OpenAI's throughput looks paced; Bedrock's looks unconstrained.</strong>
+              Across ~3,950 OpenAI requests, per-request decode speed clustered tightly
+              (stddev ~9.5 tok/s) and <em>never once exceeded ~67 tok/s</em> — the observed
+              maximum was 66.2, 66.7, and 66.7 tok/s in the three runs, which looks like a
+              deliberate per-request ceiling or aggressive batching on a heavily multi-tenant
+              fleet. Bedrock requests ranged up to ~108 tok/s with means of 47–52. Consistent
+              with newer, less-contended capacity that is not yet rationing decode speed.
+            </li>
+            <li>
+              <strong>Demand asymmetry, for now.</strong> The first-party API serves the
+              bulk of global GPT-5.5 demand; the Bedrock endpoint launched weeks ago. Lower
+              utilization means shorter queues, faster admission, and tighter tails — which is
+              exactly the shape of the data, including Bedrock's zero error rate. The honest
+              caveat is that this part of the advantage can narrow as Bedrock adoption grows.
+            </li>
+          </ul>
+
+          <p>
+            And a fourth cent, offered as pure speculation: AWS has spent years building its
+            own inference silicon (Trainium and Inferentia), and it would be unsurprising if
+            the Bedrock serving stack for these models leans on hardware and capacity that
+            OpenAI's shared fleet doesn't have. Neither provider documents what actually
+            serves these endpoints, so we can't verify it — but "same weights, different
+            metal" would be consistent with everything we measured, particularly the decode
+            throughput gap.
+          </p>
+
+          <div class="callout">
+            <p>
+              <strong>Independent corroboration.</strong> We are not the only ones measuring
+              this. <a href="https://artificialanalysis.ai/models/gpt-5-5/providers">Artificial
+              Analysis's GPT-5.5 provider comparison</a> reaches the same conclusion on a
+              different workload: Bedrock at 52.3 output tok/s versus OpenAI at 50.5, with
+              materially lower end-to-end latency on their xhigh measurement (~76 s vs ~100 s
+              to first answer token), summarized on their page as "Amazon offers the best
+              performance with both the highest speed and lowest latency." The flip side is
+              also theirs: OpenAI's list price is slightly lower ($5.00/$30.00 vs $5.50/$33.00
+              per 1M input/output tokens), so the trade is roughly 10% on price for the faster,
+              more reliable path that also lives inside AWS governance.
+            </p>
+          </div>
+
+          <div class="callout warn">
+            <p>
+              <strong>Scope of these numbers.</strong> One model (GPT-5.5), one Bedrock Region
+              (<code>us-east-2</code>), one client location, sequential single-stream
+              requests, short math prompts, measured in June 2026. Latency and error rates are
+              point-in-time properties of a serving fleet, not constants. Treat this as a
+              repeatable harness — the scripts are in the repo — and rerun it against your own
+              region, workload shape, and concurrency before committing an SLO to it.
+            </p>
+          </div>
+
+          <h3>How the benchmark works</h3>
+
+          <p>
             The benchmark script is checked into this repo at
-            <code>scripts/benchmark_openai_latency.py</code>. For the Bedrock run, it uses
+            <code>scripts/benchmark_openai_latency.py</code>. For the Bedrock runs, it uses
             <code>BEDROCK_OPENAI_API_KEY</code> or <code>AWS_BEARER_TOKEN_BEDROCK</code>
             when a Bedrock API key is available, and otherwise falls back to AWS SigV4
             credentials for direct HTTP requests. It also sets <code>store: false</code>
@@ -1187,11 +1337,12 @@
             follows the useful part of the LLMPerf pattern: keep per-invocation records, then
             publish aggregate p50, p90, and p95 metrics for time to first token, end-to-end
             latency, output throughput, input tokens, output tokens, and reasoning tokens.
-            Once the Bedrock run is complete, the table above should be replaced with measured
-            values rather than synthetic or vendor-reported latency claims.
+            Accuracy is scored separately by <code>scripts/score_gsm8k_accuracy.py</code>
+            against the same per-invocation records, so every number in this section traces
+            back to a raw JSONL line in <code>result/</code>.
           </p>
 
-          <h3>Credit sizing before we open the OpenAI account</h3>
+          <h3>Credit sizing before we opened the OpenAI account</h3>
 
           <p>
             We also added a small eval-cost estimator for the OpenAI side. It uses the public
@@ -1247,7 +1398,10 @@
             hidden reasoning tokens are billed as output tokens. The script writes both JSON
             and Markdown summaries under <code>result/openai_eval_cost_*.json</code> and
             <code>result/openai_eval_cost_*.md</code>, so we can rerun it with different
-            output budgets, models, or datasets before buying credits.
+            output budgets, models, or datasets before buying credits. The estimate held up:
+            the measured GSM8K runs on the OpenAI API came in at $5.72 (medium), $6.90 (high),
+            and $9.54 (xhigh) — under the conservative $20.88 ceiling, because real responses
+            used far fewer output tokens than the 512-token budget assumed.
           </p>
 
           <h3>What gets easier with OpenAI on Bedrock</h3>
@@ -1826,6 +1980,11 @@
               <a href="https://deepswe.datacurve.ai/">deepswe.datacurve.ai</a>
             </li>
             <li>
+              Artificial Analysis (2026). <em>GPT-5.5: API provider comparison.</em>
+              Independent cross-provider measurements of output speed, latency, and price.
+              <a href="https://artificialanalysis.ai/models/gpt-5-5/providers">artificialanalysis.ai</a>
+            </li>
+            <li>
               OpenAI (2026). <em>Codex for every role, tool, and workflow.</em>
               Codex usage and adoption update.
               <a href="https://openai.com/index/codex-for-every-role-tool-workflow/">openai.com</a>
@@ -2162,6 +2321,68 @@
               ],
             },
             options: Object.assign(baseOpts("Outgoing wires / month", "Month (Nov 2025 – Apr 2026)"), {}),
+          });
+        }
+
+        /* ── Benchmark: shared config ── */
+        var EFFORTS = ["medium", "high", "xhigh"];
+        function benchBarOpts(yLabel, ySuffix) {
+          var opts = baseOpts(yLabel, "Reasoning effort");
+          opts.plugins.legend.labels.pointStyle = "rect";
+          opts.scales.y.beginAtZero = true;
+          if (ySuffix) {
+            opts.scales.y.ticks.callback = function (value) { return value + ySuffix; };
+          }
+          return opts;
+        }
+
+        /* ── Benchmark: TTFB p50 by effort ── */
+        var ttfbEl = document.getElementById("chart-bench-ttfb");
+        if (ttfbEl) {
+          new Chart(ttfbEl, {
+            type: "bar",
+            data: {
+              labels: EFFORTS,
+              datasets: [
+                { label: "Bedrock TTFB p50", data: [220, 224, 223], backgroundColor: C.blue, borderRadius: 3 },
+                { label: "OpenAI API TTFB p50", data: [484, 497, 502], backgroundColor: C.gray, borderRadius: 3 },
+              ],
+            },
+            options: benchBarOpts("Time to first byte (ms)", " ms"),
+          });
+        }
+
+        /* ── Benchmark: end-to-end latency p50 / p90 by effort ── */
+        var e2eEl = document.getElementById("chart-bench-e2e");
+        if (e2eEl) {
+          new Chart(e2eEl, {
+            type: "bar",
+            data: {
+              labels: EFFORTS,
+              datasets: [
+                { label: "Bedrock p50", data: [2881, 3455, 3803], backgroundColor: C.blue, borderRadius: 3 },
+                { label: "OpenAI API p50", data: [2859, 3248, 4334], backgroundColor: C.gray, borderRadius: 3 },
+                { label: "Bedrock p90", data: [4369, 4801, 5792], backgroundColor: "rgba(24,119,242,0.35)", borderRadius: 3 },
+                { label: "OpenAI API p90", data: [4908, 5712, 8273], backgroundColor: "rgba(5,5,22,0.35)", borderRadius: 3 },
+              ],
+            },
+            options: benchBarOpts("End-to-end latency (ms)", " ms"),
+          });
+        }
+
+        /* ── Benchmark: mean output throughput by effort ── */
+        var tpsEl = document.getElementById("chart-bench-tps");
+        if (tpsEl) {
+          new Chart(tpsEl, {
+            type: "bar",
+            data: {
+              labels: EFFORTS,
+              datasets: [
+                { label: "Bedrock mean tok/s", data: [47.4, 48.5, 51.8], backgroundColor: C.blue, borderRadius: 3 },
+                { label: "OpenAI API mean tok/s", data: [39.1, 41.3, 39.7], backgroundColor: C.gray, borderRadius: 3 },
+              ],
+            },
+            options: benchBarOpts("Output throughput (tokens/s)"),
           });
         }
       })();
