@@ -7,6 +7,10 @@ This repo contains the standalone benchmark scripts and saved GSM8K results used
 
 The benchmark records streaming latency, token usage, reasoning tokens, output throughput, failures, and estimated OpenAI-equivalent cost.
 
+## Blog Draft
+
+The static blog draft is in `blog/`. Open `blog/index.html` locally to preview it.
+
 ## Setup
 
 ```bash

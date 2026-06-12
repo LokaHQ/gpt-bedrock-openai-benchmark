@@ -1,0 +1,2170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="OpenAI GPT-5.5, GPT-5.4, and Codex are generally available on Amazon Bedrock, and Loka is one of five global OpenAI launch partners. We show what enterprises can build next with two regulated-industry copilots: a Clinical Evidence Copilot for healthcare and an FSI Evidence Copilot for financial services."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="OpenAI on AWS: What Enterprises Can Build Next" />
+    <meta property="og:description" content="OpenAI GPT-5.5, GPT-5.4, and Codex are GA on Amazon Bedrock. Loka, one of five global launch partners, shows two evidence-first copilots for healthcare and financial services." />
+    <meta property="og:image" content="https://cdn.worldvectorlogo.com/logos/loka-1.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OpenAI on AWS: What Enterprises Can Build Next" />
+    <meta name="twitter:description" content="OpenAI GPT-5.5, GPT-5.4, and Codex are GA on Amazon Bedrock. Loka, one of five global launch partners, shows two evidence-first copilots for healthcare and financial services." />
+    <title>OpenAI on AWS: What Enterprises Can Build Next | Loka</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn.prod.website-files.com/6490383845d4c0f51f929ca8/649052c9d3731fb704eea658_favicon.svg" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Iowan Old Style BT";
+        src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_regular.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Iowan Old Style BT";
+        src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_italic.woff2")
+          format("woff2");
+        font-style: italic;
+        font-weight: 400;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Iowan Old Style BT";
+        src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_bold.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "GT America";
+        src: url("https://thinkingmachines.ai/fonts/gt-america/GT-America-Standard-Regular.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "GT America";
+        src: url("https://thinkingmachines.ai/fonts/gt-america/GT-America-Standard-Medium.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+      }
+
+      :root {
+        --bg: #fff;
+        --bg-soft: #f7f7f7;
+        --bg-code: #f4f4f3;
+        --fg: #1a1a1a;
+        --fg-2: #333;
+        --fg-3: #666;
+        --fg-4: #999;
+        --line: #e5e5e5;
+        --line-strong: #d0d0d0;
+        --accent: #1877f2;
+        --link: #1877f2;
+        --max-content: 680px;
+        --max-wide: 900px;
+        --toc-width: 200px;
+        --toc-gap: 40px;
+        --font-serif: "Iowan Old Style BT", Georgia, "Times New Roman", serif;
+        --font-sans: "GT America", -apple-system, "Segoe UI", "Helvetica Neue",
+          Helvetica, sans-serif;
+        --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono",
+          Consolas, monospace;
+        --c-blue: #1877f2;
+        --c-red: #ef4444;
+        --c-green: #22c55e;
+        --c-amber: #f59e0b;
+        --c-purple: #8b5cf6;
+        --c-teal: #14b8a6;
+        --c-gray: #6b7280;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-serif);
+        font-size: 17px;
+        line-height: 1.7;
+      }
+
+      a {
+        color: var(--link);
+      }
+
+      /* ── Reading progress ── */
+      .reading-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 2px;
+        background: var(--accent);
+        z-index: 1000;
+        transition: width 0.1s linear;
+      }
+
+      /* ── Layout ── */
+      .shell {
+        min-height: 100vh;
+      }
+
+      #main.post {
+        max-width: var(--max-wide);
+        margin: 0 auto;
+        padding: 0 1.6rem 4rem;
+        position: relative;
+      }
+
+      /* ── Header ── */
+      .post-heading {
+        text-align: center;
+        max-width: var(--max-content);
+        margin: 3.5rem auto 0;
+      }
+
+      .post-eyebrow {
+        display: inline-block;
+        margin: 0 0 1rem;
+        font-family: var(--font-sans);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        padding: 0.3rem 0.8rem;
+      }
+
+      .post-title {
+        margin: 0;
+        font-size: 2.4rem;
+        line-height: 1.2;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .post-title-main {
+        display: block;
+      }
+
+      .post-title-sub {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.92em;
+        font-weight: 600;
+        color: var(--fg-2);
+      }
+
+      .authors {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem 2rem;
+        margin: 1.6rem auto 0;
+        max-width: 420px;
+        text-align: center;
+        font-family: var(--font-sans);
+      }
+
+      .author-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.1rem;
+      }
+
+      .author-name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--fg);
+      }
+
+      .author-name a {
+        color: var(--fg);
+        text-decoration: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .author-name a:hover {
+        border-bottom-color: var(--fg);
+      }
+
+      .author-email {
+        font-size: 0.82rem;
+        color: var(--fg-3);
+      }
+
+      .author-email a {
+        color: var(--fg-3);
+        text-decoration: none;
+      }
+
+      .author-email a:hover {
+        color: var(--accent);
+      }
+
+      .author-affiliation {
+        margin: 1rem 0 0;
+        text-align: center;
+      }
+
+      .author-affiliation .loka-logo {
+        height: 2rem;
+        vertical-align: middle;
+      }
+
+      .post-date {
+        margin: 0.8rem 0 0;
+        font-family: var(--font-sans);
+        font-size: 0.88rem;
+        color: var(--fg-4);
+      }
+
+      .resource-links {
+        margin: 1rem 0 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        font-family: var(--font-sans);
+        font-size: 0.88rem;
+      }
+
+      .resource-links a {
+        color: var(--fg-3);
+        text-decoration: none;
+        border-bottom: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .resource-links a:hover {
+        color: var(--fg);
+      }
+
+      .resource-links {
+        align-items: center;
+        gap: 1.9rem;
+      }
+
+      .resource-links .brand {
+        display: block;
+        width: auto;
+        opacity: 0.82;
+        transition: opacity 0.15s ease;
+      }
+
+      .resource-links a:hover .brand {
+        opacity: 1;
+      }
+
+      .brand-openai {
+        height: 1.05rem;
+      }
+
+      .brand-aws {
+        height: 1.5rem;
+      }
+
+      .brand-loka {
+        height: 1rem;
+      }
+
+      /* ── Cover ── */
+      .post-cover {
+        max-width: var(--max-wide);
+        margin: 2.2rem auto 2.5rem;
+      }
+
+      .post-cover img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+      }
+
+      /* ── Article ── */
+      article.content {
+        max-width: var(--max-content);
+        margin: 0 auto;
+        position: relative;
+      }
+
+      /* ── Callout ── */
+      .callout {
+        border-left: 3px solid var(--accent);
+        padding: 0.8rem 1.1rem;
+        margin-bottom: 1.3rem;
+        background: var(--bg-soft);
+      }
+
+      .callout strong {
+        font-family: var(--font-sans);
+        font-weight: 500;
+      }
+
+      .callout p:first-child {
+        margin-top: 0;
+      }
+
+      .callout p:last-child,
+      .callout ul:last-child {
+        margin-bottom: 0;
+      }
+
+      .callout ul {
+        margin-left: 1.2rem;
+      }
+
+      .callout li {
+        margin-bottom: 0.3rem;
+      }
+
+      .callout.warn {
+        border-left-color: var(--c-amber);
+      }
+
+      /* ── Wide figures ── */
+      .figure-wide {
+        max-width: var(--max-wide);
+        margin-left: calc((var(--max-content) - var(--max-wide)) / 2);
+        margin-right: calc((var(--max-content) - var(--max-wide)) / 2);
+      }
+
+      .figure-wide canvas {
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      .chart-frame {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem 1.1rem 0.6rem;
+        background: var(--bg);
+      }
+
+      /* ── Video ── */
+      .video-figure video {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: #000;
+      }
+
+      /* ── Left TOC ── */
+      .left-toc {
+        position: sticky;
+        top: 2rem;
+        float: left;
+        margin-left: calc(-1 * var(--toc-width) - var(--toc-gap));
+        width: var(--toc-width);
+        font-size: 0.85rem;
+        line-height: 1.45;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+      }
+
+      .toc-title {
+        margin: 0 0 0.5rem;
+        font-family: var(--font-sans);
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--fg-4);
+        font-weight: 500;
+      }
+
+      .toc-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-left: 1px solid var(--line);
+      }
+
+      .toc-list li {
+        margin: 0;
+      }
+
+      .toc-list a {
+        display: block;
+        padding: 0.2rem 0 0.2rem 0.85rem;
+        text-decoration: none;
+        color: var(--fg-4);
+        border-left: 2px solid transparent;
+        margin-left: -1px;
+        transition: color 0.15s ease, border-color 0.15s ease;
+      }
+
+      .toc-list a:hover {
+        color: var(--fg-2);
+      }
+
+      .toc-list a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        font-weight: 500;
+      }
+
+      /* ── Content typography ── */
+      .content p,
+      .content ul,
+      .content ol,
+      .content pre,
+      .content blockquote,
+      .content table,
+      .content figure {
+        margin: 0 0 1.3rem;
+      }
+
+      .content h2,
+      .content h3,
+      .content h4 {
+        line-height: 1.3;
+        position: relative;
+      }
+
+      .content h2 {
+        margin: 2.8rem 0 0.9rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .content h3 {
+        margin: 2rem 0 0.7rem;
+        font-size: 1.15rem;
+        font-style: italic;
+        font-weight: 400;
+        color: var(--fg-2);
+      }
+
+      .content h4 {
+        margin: 1.6rem 0 0.5rem;
+        font-size: 1.05rem;
+        font-style: italic;
+        font-weight: 400;
+        color: var(--fg-2);
+      }
+
+      .heading-anchor {
+        position: absolute;
+        left: -1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        text-decoration: none;
+        color: var(--fg-4);
+        font-weight: 400;
+        font-size: 0.85em;
+        transition: opacity 0.15s ease;
+      }
+
+      .content h2:hover .heading-anchor,
+      .content h3:hover .heading-anchor,
+      .content h4:hover .heading-anchor,
+      .heading-anchor:focus {
+        opacity: 1;
+      }
+
+      .content ul {
+        margin-left: 1.5rem;
+        padding: 0;
+        list-style: disc;
+      }
+
+      .content ol {
+        margin-left: 1.7rem;
+      }
+
+      .content li {
+        margin-bottom: 0.25rem;
+      }
+
+      .content a {
+        text-decoration-color: var(--line-strong);
+        text-underline-offset: 2px;
+        transition: text-decoration-color 0.15s ease;
+      }
+
+      .content a:hover {
+        text-decoration-color: var(--fg);
+      }
+
+      .content blockquote {
+        margin-left: 0;
+        padding: 0.5rem 1.1rem;
+        border-left: 3px solid var(--line-strong);
+        color: var(--fg-2);
+      }
+
+      .content code {
+        font-family: var(--font-mono);
+        font-size: 0.84em;
+        background: var(--bg-code);
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+      }
+
+      .content pre {
+        background: var(--bg-code);
+        border-radius: 4px;
+        overflow-x: auto;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--line);
+      }
+
+      .content pre code {
+        padding: 0;
+        background: none;
+        display: block;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        border-radius: 0;
+      }
+
+      /* ── Tables ── */
+      .content table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+      .content th,
+      .content td {
+        padding: 0.5rem 0.65rem;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .content th {
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: 0.82rem;
+        color: var(--fg-3);
+        border-bottom: 2px solid var(--line-strong);
+      }
+
+      .content tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .content td code {
+        font-size: 0.8rem;
+      }
+
+      .status-pill {
+        font-family: var(--font-sans);
+        font-size: 0.72rem;
+        font-weight: 500;
+        padding: 0.08rem 0.45rem;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .status-pill.ok {
+        color: #166534;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+      }
+
+      .status-pill.review {
+        color: #92400e;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+      }
+
+      .status-pill.gap {
+        color: #991b1b;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+      }
+
+      /* ── Figures ── */
+      .content figure {
+        margin-top: 1.6rem;
+      }
+
+      .content figure img,
+      .content figure svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .content figcaption {
+        margin-top: 0.5rem;
+        font-size: 0.88rem;
+        color: var(--fg-3);
+        font-style: italic;
+        text-align: center;
+      }
+
+      /* ── Output comparison ── */
+      .output-comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1.3rem 0;
+      }
+
+      .output-box {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 1.3rem;
+      }
+
+      .output-box-header {
+        font-family: var(--font-sans);
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 0.5rem 0.8rem;
+        border-bottom: 1px solid var(--line);
+        background: var(--bg-soft);
+      }
+
+      .output-box-header.good {
+        color: #166534;
+        background: #f0fdf4;
+        border-bottom-color: #bbf7d0;
+      }
+
+      .output-box-header.bad {
+        color: #991b1b;
+        background: #fef2f2;
+        border-bottom-color: #fecaca;
+      }
+
+      .output-box-header.info {
+        color: #1e40af;
+        background: #eff6ff;
+        border-bottom-color: #bfdbfe;
+      }
+
+      .output-box-body {
+        padding: 0.8rem;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        max-height: 420px;
+        overflow-y: auto;
+      }
+
+      .output-box-body :first-child {
+        margin-top: 0;
+      }
+
+      .output-box-body :last-child {
+        margin-bottom: 0;
+      }
+
+      .output-box-body code {
+        font-size: 0.78rem;
+      }
+
+      .output-box-body table {
+        font-size: 0.8rem;
+      }
+
+      /* ── Citation ── */
+      .citation-block {
+        margin-top: 0.5rem;
+      }
+
+      .citation-block pre {
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 0.8rem 1rem;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        overflow-x: auto;
+      }
+
+      .citation-block pre code {
+        font-family: var(--font-mono);
+        background: none;
+        padding: 0;
+        color: var(--fg-2);
+      }
+
+      /* ── References ── */
+      .references-list {
+        margin-left: 1.4rem;
+        padding: 0;
+        list-style: decimal;
+      }
+
+      .references-list li {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: var(--fg-2);
+      }
+
+      .references-list li a {
+        display: inline-block;
+        margin-top: 0.1rem;
+        font-family: var(--font-sans);
+        font-size: 0.82rem;
+        color: var(--fg-3);
+      }
+
+      /* ── Paginator ── */
+      .paginator {
+        max-width: var(--max-content);
+        margin: 2.5rem auto 0;
+        padding-top: 1.2rem;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        font-family: var(--font-sans);
+        font-size: 0.88rem;
+      }
+
+      .paginator a {
+        text-decoration: none;
+        color: var(--fg-3);
+        transition: color 0.15s ease;
+      }
+
+      .paginator a:hover {
+        color: var(--fg);
+      }
+
+      /* ── Back to top ── */
+      .back-to-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg);
+        color: var(--fg-3);
+        border: 1px solid var(--line);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.25s ease, transform 0.25s ease,
+          color 0.15s ease, border-color 0.15s ease;
+        z-index: 100;
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .back-to-top.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .back-to-top:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      /* ── Loka logo ── */
+      .loka-logo {
+        display: inline-block;
+        height: 1.15em;
+        width: auto;
+        vertical-align: -0.15em;
+        margin-right: 0.15em;
+      }
+
+      .site-footer .loka-logo {
+        height: 1em;
+        vertical-align: -0.1em;
+      }
+
+      /* ── Footer ── */
+      .site-footer {
+        max-width: var(--max-content);
+        margin: 0 auto;
+        padding: 1.5rem 1.6rem 2rem;
+        font-family: var(--font-sans);
+        font-size: 0.82rem;
+        color: var(--fg-4);
+        text-align: center;
+        border-top: 1px solid var(--line);
+      }
+
+      .site-footer a {
+        color: var(--fg-3);
+        text-decoration: none;
+      }
+
+      .site-footer a:hover {
+        color: var(--fg);
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 1100px) {
+        .left-toc {
+          display: none;
+        }
+
+        .heading-anchor {
+          display: none;
+        }
+
+        .figure-wide {
+          max-width: var(--max-content);
+          margin-left: 0;
+          margin-right: 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          font-size: 16px;
+        }
+
+        #main.post {
+          padding: 0 1.1rem 3rem;
+        }
+
+        .post-title {
+          font-size: 1.7rem;
+        }
+
+        .resource-links {
+          gap: 1rem;
+          font-size: 0.82rem;
+        }
+
+        .content h2 {
+          font-size: 1.3rem;
+        }
+
+        .callout {
+          padding: 0.7rem 0.9rem;
+        }
+
+        .content table {
+          font-size: 0.8rem;
+        }
+
+        .content th,
+        .content td {
+          padding: 0.4rem 0.45rem;
+        }
+
+        .back-to-top {
+          bottom: 1.2rem;
+          right: 1.2rem;
+        }
+
+        .output-comparison {
+          grid-template-columns: 1fr;
+        }
+
+      }
+
+      /* ── Print ── */
+      @media print {
+        .reading-progress,
+        .left-toc,
+        .back-to-top,
+        .paginator {
+          display: none !important;
+        }
+
+        body {
+          font-size: 11pt;
+        }
+
+        .figure-wide {
+          max-width: 100%;
+          margin-left: 0;
+          margin-right: 0;
+        }
+
+        a {
+          color: inherit;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reading-progress" id="reading-progress"></div>
+    <a id="top"></a>
+    <div class="shell">
+      <main id="main" class="post">
+        <section class="post-heading">
+          <span class="post-eyebrow">OpenAI on Amazon Bedrock · Launch Partner</span>
+          <h1 class="post-title">
+            <span class="post-title-main">OpenAI on AWS:<br />What Enterprises Can Build Next</span>
+            <span class="post-title-sub">a launch-partner build report from Loka</span>
+          </h1>
+          <div class="authors">
+            <div class="author-card">
+              <span class="author-name"><a href="https://github.com/petarkalinovski">Petar Kalinovski</a></span>
+              <span class="author-email"><a href="mailto:petar.kalinovski@loka.com">petar.kalinovski@loka.com</a></span>
+            </div>
+            <div class="author-card">
+              <span class="author-name"><a href="https://github.com/Shekswess">Bojan Jakimovski</a></span>
+              <span class="author-email"><a href="mailto:bojan.jakimovski@loka.com">bojan.jakimovski@loka.com</a></span>
+            </div>
+          </div>
+          <div class="author-affiliation">
+            <img src="https://cdn.worldvectorlogo.com/logos/loka-1.svg" alt="Loka" class="loka-logo" />
+          </div>
+          <p class="post-date">June 2026</p>
+          <ul class="resource-links">
+            <li><a href="https://openai.com/index/openai-on-aws/" aria-label="OpenAI and AWS partnership announcement"><img class="brand brand-openai" src="assets/openai-logo.svg" alt="OpenAI" /></a></li>
+            <li><a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/" aria-label="Launch announcement on AWS"><img class="brand brand-aws" src="assets/aws-logo.svg" alt="Amazon Web Services" /></a></li>
+            <li><a href="https://www.loka.com" aria-label="Loka"><img class="brand brand-loka" src="https://cdn.worldvectorlogo.com/logos/loka-1.svg" alt="Loka" /></a></li>
+          </ul>
+        </section>
+
+        <figure class="post-cover">
+          <img src="assets/cover-banner.png" alt="OpenAI on AWS banner with OpenAI, AWS, and Loka logos" />
+        </figure>
+
+        <article class="content">
+          <nav class="left-toc" aria-label="Table of contents">
+            <p class="toc-title">Contents</p>
+            <ul class="toc-list">
+              <li><a href="#introduction">Introduction</a></li>
+              <li><a href="#why-bedrock">Why OpenAI on Bedrock</a></li>
+              <li><a href="#latency-benchmark">Latency benchmark</a></li>
+              <li><a href="#template">Production service pattern</a></li>
+              <li><a href="#fsi">Financial-services copilot</a></li>
+              <li><a href="#clinical">Healthcare copilot</a></li>
+              <li><a href="#pattern">Evidence over decisions</a></li>
+              <li><a href="#production">From migration to production</a></li>
+              <li><a href="#conclusion">Conclusion</a></li>
+            </ul>
+          </nav>
+
+          <!-- ═══════════════════ 1. INTRODUCTION ═══════════════════ -->
+
+          <h2 id="introduction">
+            Introduction
+            <a class="heading-anchor" href="#introduction" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            OpenAI <strong>GPT-5.5, GPT-5.4, and Codex</strong> are now generally
+            available on <strong>Amazon Bedrock</strong>. For enterprises, that is more than
+            a new catalog entry: it creates a path to use OpenAI capabilities inside the AWS
+            security, governance, procurement, and operational controls they already run.
+            Loka is one of only five OpenAI launch partners globally, giving us a front-row
+            role in helping customers turn this new path into production systems.
+          </p>
+
+          <p>
+            That designation is both a milestone and a practical signal. Since 2023, Loka
+            teams have helped lead more than 500 GenAI and agentic AI launches, with over half
+            already in production or moving there. OpenAI on Bedrock gives that work a cleaner
+            route from experimentation to secure, scalable enterprise systems in the AWS
+            environments customers already trust.
+          </p>
+
+          <p>
+            A launch is easy to celebrate and hard to substantiate. So this post is a build
+            report grounded in what we built. We used Loka's production agent architecture and
+            delivery patterns to stand up <em>two</em> copilots for two of the most heavily
+            regulated industries we work in. The point is not to expose implementation
+            mechanics; it is to show how authentication, scoped data access, observability,
+            guardrails, deployment, and human review can travel across use cases:
+          </p>
+
+          <ul>
+            <li>
+              <strong>FSI Evidence Copilot</strong> (financial services): prepares evidence
+              packets for small-business lending, KYC refresh, and AML alert review.
+            </li>
+            <li>
+              <strong>Clinical Evidence Copilot</strong> (healthcare &amp; life sciences):
+              prepares synthetic-patient evidence packets for coverage and medication reviews.
+            </li>
+          </ul>
+
+          <p>
+            They share production obligations: governed access, traceability, guardrails,
+            deployment discipline, and, most importantly, a human-review boundary.
+            <strong>Both prepare evidence for a human; neither makes the decision.</strong>
+            The domain services and data sources differ by use case, but with OpenAI now
+            generally available on Bedrock, the model/provider choice can stay inside the
+            enterprise platform strategy instead of becoming a separate AI platform decision.
+          </p>
+
+          <div class="callout">
+            <p>
+              <strong>What we want you to take away.</strong> The useful unlock is the
+              combination: a model-agnostic production architecture, Bedrock's governance
+              surface, and OpenAI-compatible APIs. Together, they let teams
+              move regulated workloads from prototype to production while preserving the AWS
+              controls their security and platform teams already understand.
+            </p>
+          </div>
+
+          <!-- ═══════════════════ 2. WHY OPENAI ON BEDROCK ═══════════════════ -->
+
+          <h2 id="why-bedrock">
+            Why OpenAI on Bedrock matters for the enterprise
+            <a class="heading-anchor" href="#why-bedrock" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            For enterprises already running regulated workloads on AWS, the biggest obstacle
+            is often the operational change that follows when data, access controls, audit
+            trails, procurement terms, and procedures move outside the approved cloud
+            environment. A new model vendor can trigger security review, legal review,
+            data-processing review, vendor onboarding, logging changes, and new runbooks.
+            OpenAI models on Bedrock make the shift materially smaller because the model
+            choice sits inside the AWS control plane teams already trust:
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Concern</th>
+                <th>What Bedrock gives you</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Data residency &amp; privacy</td>
+                <td>Inference runs in the selected Bedrock Region; prompts and responses are not used to train models or shared with model providers.</td>
+              </tr>
+              <tr>
+                <td>Identity &amp; access</td>
+                <td>Standard AWS controls such as IAM, VPC connectivity, and CloudTrail around the model invocation path.</td>
+              </tr>
+              <tr>
+                <td>Safety</td>
+                <td>Amazon Bedrock Guardrails and platform controls can be applied through supported Bedrock APIs and model paths.</td>
+              </tr>
+              <tr>
+                <td>API fit &amp; portability</td>
+                <td>Use AWS-native APIs such as <code>Converse</code> for supported models, or OpenAI-compatible <code>Responses</code> and chat-completions APIs on Bedrock when that is the better fit.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
+            That last row is the one that compounds. For existing Bedrock-native workloads,
+            <code>Converse</code> keeps a common interface across supported model families.
+            For GPT-5.5, GPT-5.4, and Codex on Bedrock, AWS points developers to the
+            OpenAI-compatible <code>Responses</code> API on the Bedrock Mantle endpoint. The
+            exact adapter can change by workload, while the architecture stays steady: model
+            selection belongs in configuration, while auth, evidence access, auditability,
+            streaming, and deployment stay stable.
+          </p>
+
+          <h3>Capability is part of the enterprise case</h3>
+
+          <p>
+            The governance story only matters if the models are worth adopting. Today, the
+            evidence is strongest in agentic software work: on Datacurve's DeepSWE benchmark,
+            which measures long-horizon repository tasks, GPT-5.5 leads the published sweep
+            while using fewer output tokens than Opus 4.8 at comparable and higher reasoning
+            levels. Opus 4.8 improves as reasoning effort rises and has strong results too,
+            but its max configuration spends far more output tokens and time for a lower
+            pass@1 than GPT-5.5 xhigh. The enterprise takeaway is that the Bedrock launch
+            brings one of the current frontier leaders into the AWS operating model teams
+            already use.
+          </p>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-deepswe-efficiency" height="230"></canvas></div>
+            <figcaption>
+              DeepSWE snapshot from Datacurve, updated May 30, 2026. X axis is mean output tokens per task; Y axis is pass@1. Each point is labeled by reasoning level. Tooltips include cost and time per task.
+            </figcaption>
+          </figure>
+
+          <p>
+            Codex adds the adoption signal behind the benchmark story. OpenAI reports that
+            more than 5 million people use Codex every week, with non-developers now making up
+            about 20% of users and growing more than three times as fast as developers. That
+            matters for enterprises because the same agentic pattern is moving from coding into
+            analysis, reporting, workflow automation, and other knowledge work, exactly the
+            kind of operational surface where AWS governance and procurement matter.
+          </p>
+
+          <!-- ═══════════════════ 2B. LATENCY BENCHMARK ═══════════════════ -->
+
+          <h2 id="latency-benchmark">
+            Latency benchmark: OpenAI-compatible APIs
+            <a class="heading-anchor" href="#latency-benchmark" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            Capability is only half the enterprise question. The other half is whether the
+            model path feels responsive to the user. For that, we added a small streaming
+            benchmark that measures the numbers people actually feel in an application:
+            time to first byte, time to first output token, total streamed latency, and output
+            throughput. The harness uses the same OpenAI-compatible <code>Responses</code>
+            shape for both providers, so the comparison can stay focused on the API path
+            rather than client-library differences.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Provider path</th>
+                <th>Models</th>
+                <th>Status</th>
+                <th>What we will publish</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Amazon Bedrock Mantle</td>
+                <td><code>openai.gpt-5.5</code>, <code>openai.gpt-5.4</code></td>
+                <td><span class="status-pill review">pending live credentials</span></td>
+                <td>Bedrock-only p50/p90 TTFT and total-latency numbers from the local benchmark run.</td>
+              </tr>
+              <tr>
+                <td>OpenAI first-party API</td>
+                <td><code>gpt-5.5</code>, <code>gpt-5.4</code></td>
+                <td><span class="status-pill review">pending API access</span></td>
+                <td>Same prompts, same output cap, same reasoning effort, same streaming metric definitions.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
+            The benchmark script is checked into this repo at
+            <code>scripts/benchmark_openai_latency.py</code>. For the Bedrock run, it uses
+            <code>BEDROCK_OPENAI_API_KEY</code> or <code>AWS_BEARER_TOKEN_BEDROCK</code>
+            when a Bedrock API key is available, and otherwise falls back to AWS SigV4
+            credentials for direct HTTP requests. It also sets <code>store: false</code>
+            because the benchmark does not need Responses API conversation state.
+          </p>
+
+          <pre><code>uv run python scripts/benchmark_openai_latency.py \
+  --provider bedrock \
+  --region us-east-2 \
+  --runs 30 \
+  --warmups 5 \
+  --reasoning-effort medium \
+  --max-output-tokens 180</code></pre>
+
+          <p>
+            The output lands in <code>result/openai_responses_latency_*.jsonl</code> and
+            <code>result/openai_responses_latency_*_summary.json</code>, with a readable
+            Markdown report at <code>result/openai_responses_latency_*.md</code>. The report
+            follows the useful part of the LLMPerf pattern: keep per-invocation records, then
+            publish aggregate p50, p90, and p95 metrics for time to first token, end-to-end
+            latency, output throughput, input tokens, output tokens, and reasoning tokens.
+            Once the Bedrock run is complete, the table above should be replaced with measured
+            values rather than synthetic or vendor-reported latency claims.
+          </p>
+
+          <h3>Credit sizing before we open the OpenAI account</h3>
+
+          <p>
+            We also added a small eval-cost estimator for the OpenAI side. It uses the public
+            tokenizer path through <code>tiktoken</code> when available, counts the prompt
+            tokens for a benchmark dataset, then applies the current per-token model pricing.
+            For a first pass on <strong>GSM8K test</strong> (1,319 questions), using a
+            conservative budget of 256 visible output tokens plus 256 reasoning-output tokens
+            per sample, the expected credit requirement is small enough to approve without
+            guesswork:
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Samples</th>
+                <th>Avg input tokens</th>
+                <th>Output budget</th>
+                <th>Standard API cost</th>
+                <th>Batch API cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>gpt-5.4</code></td>
+                <td>1,319</td>
+                <td>93.5</td>
+                <td>512 / sample</td>
+                <td>$10.44</td>
+                <td>$5.22</td>
+              </tr>
+              <tr>
+                <td><code>gpt-5.5</code></td>
+                <td>1,319</td>
+                <td>93.5</td>
+                <td>512 / sample</td>
+                <td>$20.88</td>
+                <td>$10.44</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><code>uv run --with tiktoken python scripts/estimate_openai_eval_cost.py \
+  --dataset gsm8k \
+  --split test \
+  --model gpt-5.4 \
+  --model gpt-5.5 \
+  --visible-output-tokens 256 \
+  --reasoning-output-tokens 256</code></pre>
+
+          <p>
+            The estimate is deliberately transparent: output budget dominates the cost, and
+            hidden reasoning tokens are billed as output tokens. The script writes both JSON
+            and Markdown summaries under <code>result/openai_eval_cost_*.json</code> and
+            <code>result/openai_eval_cost_*.md</code>, so we can rerun it with different
+            output budgets, models, or datasets before buying credits.
+          </p>
+
+          <h3>What gets easier with OpenAI on Bedrock</h3>
+
+          <p>
+            In the examples below, the announcement matters because teams can pair OpenAI's
+            strongest reasoning and agentic models with the AWS controls that already govern
+            regulated workloads:
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Build pressure</th>
+                <th>Why OpenAI on Bedrock helps</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hard reasoning over messy evidence</td>
+                <td>GPT-5.5 and GPT-5.4 are available for complex professional and agentic work, so the same review workflow can use stronger models without leaving AWS.</td>
+              </tr>
+              <tr>
+                <td>Security and platform review</td>
+                <td>Inference stays in the selected Bedrock Region and runs under AWS controls like IAM, PrivateLink/VPC isolation, KMS encryption, and CloudTrail logging.</td>
+              </tr>
+              <tr>
+                <td>Procurement and scale-up</td>
+                <td>Usage can count through existing AWS commitments, which removes a common blocker between prototype approval and production rollout.</td>
+              </tr>
+              <tr>
+                <td>Engineering velocity</td>
+                <td>The OpenAI-compatible <code>Responses</code> API lets teams adapt existing OpenAI patterns while keeping deployment, auth, observability, and data access on AWS.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- ═══════════════════ 3. ARCHITECTURE ═══════════════════ -->
+
+          <h2 id="template">
+            Production service pattern
+            <a class="heading-anchor" href="#template" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            The healthcare and financial-services demos share something more useful than a
+            shared implementation: a governed service pattern. Each one starts with
+            authenticated access, retrieves only scoped evidence, maps that evidence to policy,
+            labels gaps and stale records, emits observable traces and artifacts, applies
+            guardrails around scope, and leaves the final decision with a qualified human.
+          </p>
+
+          <figure class="figure-wide">
+            <div class="chart-frame">
+              <svg viewBox="0 0 920 620" role="img" aria-label="Side-by-side structure of the financial services and clinical evidence copilots" style="width:100%;height:auto;">
+                <defs>
+                  <marker id="agent-arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L7,3 L0,6 Z" fill="#999" />
+                  </marker>
+                  <style>
+                    .frame { fill: #fff; stroke: #d0d0d0; stroke-width: 1.5; }
+                    .shared { fill: #f7f7f7; stroke: #d0d0d0; stroke-width: 1.5; }
+                    .fsi { fill: #eff6ff; stroke: #1877f2; stroke-width: 1.5; }
+                    .clinical { fill: #f0fdf4; stroke: #0c6f71; stroke-width: 1.5; }
+                    .warn { fill: #fffbeb; stroke: #f59e0b; stroke-width: 1.5; }
+                    .dark { fill: #050516; stroke: #050516; }
+                    .line { stroke: #999; stroke-width: 1.5; fill: none; marker-end: url(#agent-arrow); }
+                    text { font-family: 'GT America', -apple-system, 'Segoe UI', Helvetica, sans-serif; fill: #1a1a1a; font-size: 13px; }
+                    .title { font-size: 16px; font-weight: 500; }
+                    .label { font-weight: 500; }
+                    .small { fill: #666; font-size: 11px; }
+                    .white { fill: #fff; }
+                    .mono { font-family: 'SF Mono','Fira Code',Consolas,monospace; font-size: 10.5px; }
+                  </style>
+                </defs>
+
+                <rect class="shared" x="230" y="20" width="460" height="48" rx="8" />
+                <text class="title" x="460" y="49" text-anchor="middle">Same governed pattern, different review surfaces</text>
+
+                <line class="line" x1="300" y1="68" x2="250" y2="105" />
+                <line class="line" x1="620" y1="68" x2="670" y2="105" />
+
+                <rect class="fsi" x="40" y="105" width="370" height="420" rx="12" />
+                <text class="title" x="225" y="135" text-anchor="middle">FSI Evidence Copilot</text>
+                <text class="small" x="225" y="154" text-anchor="middle">small-business lending · KYC · AML review</text>
+
+                <rect class="frame" x="70" y="180" width="310" height="46" rx="8" />
+                <text class="label" x="225" y="207" text-anchor="middle">Analyst asks for a review packet</text>
+
+                <line class="line" x1="225" y1="226" x2="225" y2="258" />
+                <rect class="frame" x="70" y="258" width="310" height="88" rx="8" />
+                <text class="label" x="90" y="284">Domain services</text>
+                <text class="small" x="90" y="307">case context · policy mapping</text>
+                <text class="small" x="90" y="325">risk artifacts · review packets</text>
+
+                <line class="line" x1="225" y1="346" x2="225" y2="378" />
+                <rect class="frame" x="70" y="378" width="310" height="86" rx="8" />
+                <text class="label" x="90" y="404">Governed data access</text>
+                <text class="small" x="90" y="427">documents · records · alerts</text>
+                <text class="small" x="90" y="445">source IDs · freshness checks</text>
+
+                <line class="line" x1="225" y1="464" x2="225" y2="492" />
+                <rect class="warn" x="70" y="492" width="310" height="60" rx="8" />
+                <text class="label" x="90" y="518">Output to human reviewer</text>
+                <text class="small" x="90" y="540">draft packet, gaps, risks, source IDs</text>
+
+                <rect class="clinical" x="510" y="105" width="370" height="420" rx="12" />
+                <text class="title" x="695" y="135" text-anchor="middle">Clinical Evidence Copilot</text>
+                <text class="small" x="695" y="154" text-anchor="middle">coverage review · medication review · utilization review</text>
+
+                <rect class="frame" x="540" y="180" width="310" height="46" rx="8" />
+                <text class="label" x="695" y="207" text-anchor="middle">Clinician asks for a review packet</text>
+
+                <line class="line" x1="695" y1="226" x2="695" y2="258" />
+                <rect class="frame" x="540" y="258" width="310" height="88" rx="8" />
+                <text class="label" x="560" y="284">Domain services</text>
+                <text class="small" x="560" y="307">patient context · policy mapping</text>
+                <text class="small" x="560" y="325">criteria artifacts · review packets</text>
+
+                <line class="line" x1="695" y1="346" x2="695" y2="378" />
+                <rect class="frame" x="540" y="378" width="310" height="86" rx="8" />
+                <text class="label" x="560" y="404">Governed data access</text>
+                <text class="small" x="560" y="427">records · policies · clinical context</text>
+                <text class="small" x="560" y="445">source IDs · freshness checks</text>
+
+                <line class="line" x1="695" y1="464" x2="695" y2="492" />
+                <rect class="warn" x="540" y="492" width="310" height="60" rx="8" />
+                <text class="label" x="560" y="518">Output to human reviewer</text>
+                <text class="small" x="560" y="540">draft packet, stale evidence, source IDs</text>
+
+                <rect class="dark" x="185" y="562" width="550" height="46" rx="8" />
+                <text class="white label" x="460" y="583" text-anchor="middle">Amazon Bedrock model path stays governed</text>
+                <text class="white small" x="460" y="600" text-anchor="middle">auth · observability · guardrails · audit · human decision ownership</text>
+              </svg>
+            </div>
+            <figcaption>
+              The two copilots use the same production service pattern across different
+              domains. Each retrieves scoped evidence, turns it into a cited draft packet, and
+              hands the decision back to a human reviewer.
+            </figcaption>
+          </figure>
+
+          <p>
+            This is the useful kind of reuse. The healthcare and financial-services examples
+            read different sources and produce different review artifacts because the work is
+            different. What stays the same is the operating contract: cite the evidence, expose
+            gaps, preserve auditability, keep the run observable, and refuse the final call.
+          </p>
+
+          <p>
+            OpenAI on Bedrock matters here because the model can change without moving the
+            workflow out of the governed AWS environment. For GPT-5.5, GPT-5.4, and Codex,
+            AWS points developers to the OpenAI-compatible <code>Responses</code> API on
+            Bedrock Mantle. The adapter changes; the domain services, source IDs, auth boundary,
+            audit trail, and human-review output contract should stay intact.
+          </p>
+
+          <p>
+            That also makes model migration more practical. Teams already running Bedrock
+            workloads on Anthropic, Amazon Nova, or other supported model families can add
+            OpenAI where it fits without rebuilding the surrounding product. The work is still
+            an engineering migration, not a string replacement: model IDs, invocation adapters,
+            streaming behavior, tool contracts, observability hooks, and regression checks all
+            need attention. But the business workflow, AWS security posture, and production
+            service boundary can remain recognizable.
+          </p>
+
+          <!-- ═══════════════════ 4. FSI ═══════════════════ -->
+
+          <h2 id="fsi">
+            Financial services: the FSI Evidence Copilot
+            <a class="heading-anchor" href="#fsi" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            We lead with financial services because the cost of a wrong call is unambiguous.
+            Lending, KYC, and AML review are evidence-assembly problems wearing a decision's
+            clothing: an analyst has to find the policy, locate every qualifying fact across
+            statements and alerts, decide what is missing, and document the chain before any
+            human judgment is even possible. The FSI Evidence Copilot does the assembly and,
+            critically, never approves credit, files a SAR, closes an alert, or freezes funds.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Answer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>What is manual today?</td>
+                <td>An analyst hunts across bank statements, case notes, policies, and alerts before the real review can begin.</td>
+              </tr>
+              <tr>
+                <td>What does the copilot do?</td>
+                <td>It assembles a requirement-by-requirement evidence packet with source IDs, missing items, and stale documents called out.</td>
+              </tr>
+              <tr>
+                <td>Where does the human stay in control?</td>
+                <td>The analyst still approves, denies, escalates, files, or closes. The agent only prepares the packet.</td>
+              </tr>
+              <tr>
+                <td>What changes operationally?</td>
+                <td>Less prep time, fewer uncited claims, and a clearer audit trail for every exception.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table>
+            <thead>
+              <tr><th>Tool</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>fsi_list_cases</code> / <code>fsi_get_case_brief</code></td><td>Enumerate synthetic cases and pull case facts with source IDs.</td></tr>
+              <tr><td><code>fsi_map_policy_evidence</code></td><td>Map each policy requirement to evidence, with explicit gap and staleness flags.</td></tr>
+              <tr><td><code>fsi_create_chart_artifact</code></td><td>Generate cash-flow / risk chart artifacts for the packet.</td></tr>
+              <tr><td><code>fsi_draft_review_packet</code></td><td>Assemble the draft, human-review-only packet.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Walkthrough: small-business credit renewal (Atlas Industrial Supplies)</h3>
+
+          <p>
+            Atlas, a regional industrial-parts distributor, asks to raise its credit line from
+            $450K to $700K. The copilot opens the case, maps the <em>Small Business Credit
+            Policy 2026</em>, and immediately sorts the file into supported evidence and open
+            gaps:
+          </p>
+
+          <div class="output-box">
+            <div class="output-box-header info">FSI Evidence Copilot · SBL-2026-0417-ATLAS: evidence checklist (excerpt)</div>
+            <div class="output-box-body">
+              <table>
+                <thead><tr><th>Requirement</th><th>Status</th><th>Evidence</th></tr></thead>
+                <tbody>
+                  <tr><td>DSCR ≥ 1.25× for increases above $500K</td><td><span class="status-pill review">unclear</span></td><td>Trailing six-month DSCR averages 1.19×; only Nov &amp; Feb clear 1.25× <code>DOC-ATLAS-BANK-APR</code></td></tr>
+                  <tr><td>Ownership attestation &lt; 365 days</td><td><span class="status-pill gap">not found</span></td><td>Attestation on file is <strong>412 days</strong> old <code>CASE-ATLAS-APP</code></td></tr>
+                  <tr><td>Most recent 90 days of statements</td><td><span class="status-pill ok">found</span></td><td>Feb–Apr 2026 indexed; April 20 days old <code>DOC-ATLAS-BANK-APR</code></td></tr>
+                  <tr><td>AR aging reviewed for distributors</td><td><span class="status-pill gap">not found</span></td><td>No AR aging document in the case index</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p>
+            The first graph earns its keep by putting the underwriting exception in one
+            glance. The policy says credit increases above
+            $500K need DSCR at or above 1.25×. Atlas is below that floor in four of the last
+            six months, with a January trough at 1.11× and an April reading of 1.08×. Instead
+            of producing an automated denial, the copilot gives the analyst the evidence
+            behind a request that cannot be rubber-stamped.
+          </p>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-dscr" height="150"></canvas></div>
+            <figcaption>Atlas monthly DSCR vs. the 1.25× policy threshold (dashed). Source: <code>DOC-ATLAS-BANK-APR</code>.</figcaption>
+          </figure>
+
+          <p>
+            The second graph needs more context, because wire counts alone cannot prove
+            suspicious activity. We include it because it shows the same review pattern in a
+            different financial-services workflow: the agent spots a jump, attaches it to the
+            source alert, and explains why a human should look. Atlas jumps to 17 outgoing
+            wires in April against a five-month average of seven. Northstar, an AML case,
+            spikes to 19 against an expected five. The copilot routes the anomaly into the
+            review packet for a human to evaluate.
+          </p>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-wires" height="150"></canvas></div>
+            <figcaption>Monthly outgoing wire count. The chart gives reviewers a triage cue: the copilot surfaces the spike, cites the source alert, and routes the anomaly to a human reviewer.</figcaption>
+          </figure>
+
+          <p>When asked to just approve the increase, the copilot refuses the decision and offers the next analyst action instead:</p>
+
+          <div class="output-comparison">
+            <div class="output-box" style="margin-bottom:0;">
+              <div class="output-box-header bad">Out of bounds: declined</div>
+              <div class="output-box-body">
+                <p style="margin:0;">
+                  "I can't approve or deny this credit increase. That's a human underwriting
+                  decision. The DSCR exception (1.18× vs. 1.25×) and the 412-day-old ownership
+                  attestation both require review before any recommendation."
+                </p>
+              </div>
+            </div>
+            <div class="output-box" style="margin-bottom:0;">
+              <div class="output-box-header good">In bounds: delivered</div>
+              <div class="output-box-body">
+                <p style="margin:0;">
+                  Draft packet with executive snapshot, requirement-to-evidence map, three
+                  ranked risk indicators, and recommended next actions: request AR aging and a
+                  refreshed attestation, explain the April wire spike, route the DSCR exception
+                  to underwriting.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <figure class="figure-wide video-figure">
+            <video controls preload="metadata" poster="assets/fsi-copilot-thumb.png">
+              <source src="assets/fsi-copilot-demo.mp4" type="video/mp4" />
+              Your browser does not support embedded video.
+              <a href="assets/fsi-copilot-demo.mp4">Download the demo</a>.
+            </video>
+            <figcaption>The FSI Evidence Copilot launch walkthrough: case brief → checklist → cash-flow chart → draft packet, with the decision boundary held throughout.</figcaption>
+          </figure>
+
+          <!-- ═══════════════════ 5. CLINICAL ═══════════════════ -->
+
+          <h2 id="clinical">
+            Healthcare: the Clinical Evidence Copilot
+            <a class="heading-anchor" href="#clinical" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            Swap the industry, keep the pattern. Utilization review and prior authorization are
+            the same evidence-assembly problem with different policies: find the relevant
+            policy, locate every qualifying fact in a messy chart, and decide what is missing,
+            all while keeping the same hard boundary around the judgment. The Clinical Evidence
+            Copilot does the assembly; a clinician makes the call.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Answer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>What is manual today?</td>
+                <td>A reviewer reads chart notes, labs, medication history, and coverage policy to determine whether the file is ready for review.</td>
+              </tr>
+              <tr>
+                <td>What does the copilot do?</td>
+                <td>It maps each policy criterion to chart evidence, labels stale or missing documentation, and exports a draft packet.</td>
+              </tr>
+              <tr>
+                <td>Where does the human stay in control?</td>
+                <td>A clinician still decides coverage, medical necessity, or next clinical action. The agent never declares eligibility.</td>
+              </tr>
+              <tr>
+                <td>What changes operationally?</td>
+                <td>Faster chart prep, clearer missing-document requests, and a review record that can be defended.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>It works one synthetic patient at a time, and for every claim it cites a source ID returned by its tools:</p>
+
+          <table>
+            <thead>
+              <tr><th>Tool</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>clinical_evidence_workspace</code></td><td>Patient brief, timeline, criteria mapping, and missing-documentation review.</td></tr>
+              <tr><td><code>list/read/save_clinical_policy</code></td><td>Inspect Markdown coverage policies, or draft one (flagged for human review).</td></tr>
+              <tr><td><code>save_clinical_evidence_packet</code></td><td>Export a draft evidence packet as a downloadable artifact.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Demo 1: Home oxygen therapy (CEC-1003)</h3>
+
+          <p>
+            A 71-year-old synthetic patient requests a home oxygen concentrator. There is no
+            policy on file, so the copilot drafts one (marked <code>DRAFT, REQUIRES HUMAN
+            REVIEW</code>), then maps 17 criteria to the chart: 11 supported, 4 needing review,
+            2 missing. It surfaces the clinically decisive fact: a six-minute walk test where
+            SpO₂ fell to 86% on room air and recovered to 93% on 2 L/min. It also clearly
+            flags the gaps a reviewer must close, like the absent ICD-10 code.
+          </p>
+
+          <h3>Demo 2: GLP-1 diabetes medication review (CEC-1001)</h3>
+
+          <p>
+            A 56-year-old synthetic patient is up for a GLP-1 (semaglutide) review. The copilot
+            pulls the chart timeline, maps the policy checklist, and lands on the kind of
+            subtle, easy-to-miss finding that makes or breaks a review:
+          </p>
+
+          <div class="output-box">
+            <div class="output-box-header info">Clinical Evidence Copilot · CEC-1001: policy-derived checklist (excerpt)</div>
+            <div class="output-box-body">
+              <table>
+                <thead><tr><th>Criterion</th><th>Status</th><th>Evidence</th></tr></thead>
+                <tbody>
+                  <tr><td>Adult member</td><td><span class="status-pill ok">found</span></td><td>Age 56</td></tr>
+                  <tr><td>Diagnosis</td><td><span class="status-pill ok">found</span></td><td>T2DM documented since 2021-08-14</td></tr>
+                  <tr><td>Glycemic evidence</td><td><span class="status-pill review">needs human review</span></td><td>A1c <strong>8.1%</strong> is <strong>131 days old</strong>; policy requires ≤ 90 days</td></tr>
+                  <tr><td>Prior therapy</td><td><span class="status-pill ok">found</span></td><td>Metformin ER trial, intolerance documented</td></tr>
+                  <tr><td>Safety screening</td><td><span class="status-pill review">needs human review</span></td><td>Pregnancy status and MTC/MEN-2 screening not documented</td></tr>
+                </tbody>
+              </table>
+              <p style="margin-top:0.7rem;">
+                <strong>Draft packet status:</strong> ready for human review, with caveats:
+                glycemic evidence is stale (131 vs 90 days) and safety documentation is
+                incomplete. The copilot routes the exception to a human without declaring the
+                patient approved or eligible.
+              </p>
+            </div>
+          </div>
+
+          <figure class="figure-wide video-figure">
+            <video controls preload="metadata" poster="assets/clinical-glp1-poster.png">
+              <source src="assets/clinical-glp1-demo.mp4" type="video/mp4" />
+              Your browser does not support embedded video.
+              <a href="assets/clinical-glp1-demo.mp4">Download the demo</a>.
+            </video>
+            <figcaption>The Clinical Evidence Copilot preparing the GLP-1 review (CEC-1001) end to end.</figcaption>
+          </figure>
+
+          <p>
+            The final chart gives reviewers a readiness view. Green means the file has
+            evidence for that criterion. Amber means the criterion may be supportable but needs
+            human review, for example, stale A1c or
+            incomplete safety screening. Red means the record is missing something the reviewer
+            should request before spending time on a final determination.
+          </p>
+
+          <figure class="figure-wide">
+            <div class="chart-frame"><canvas id="chart-clinical" height="150"></canvas></div>
+            <figcaption>Criteria status by review. The useful signal includes what is supported, stale, ambiguous, or missing before the clinician opens the chart.</figcaption>
+          </figure>
+
+          <!-- ═══════════════════ 6. PATTERN ═══════════════════ -->
+
+          <h2 id="pattern">
+            The shared pattern: evidence over decisions
+            <a class="heading-anchor" href="#pattern" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            These two copilots feel like the same product because of the operating contract
+            baked into the product behavior and enforced by guardrails. In regulated work, this
+            contract is the difference between a tool people are allowed to use and a demo that
+            never ships:
+          </p>
+
+          <ul>
+            <li><strong>Cite everything.</strong> Every material claim references a source ID (a chart note, a bank statement, an alert) or a policy section. No uncited assertions.</li>
+            <li><strong>Name the gaps as loudly as the matches.</strong> Each criterion gets exactly one status: <em>found</em>, <em>not found</em>, <em>unclear</em>, or <em>needs human review</em>. Stale and missing evidence are first-class outputs.</li>
+            <li><strong>Refuse the final call.</strong> No "approved," "denied," "eligible," or "file the SAR." The copilot drafts; a licensed human decides.</li>
+            <li><strong>Stay in scope.</strong> One patient or one case at a time, synthetic data only, no invented facts.</li>
+          </ul>
+
+          <div class="callout warn">
+            <p>
+              <strong>Why the boundary helps.</strong> The temptation with a capable model is
+              to let it decide. In healthcare and financial services, that judgment belongs
+              with a qualified human. By designing the agent to be
+              excellent at <em>assembly</em> and deliberately incapable of <em>determination</em>,
+              the human reviewer gets leverage without inheriting a black-box decision they
+              can't defend.
+            </p>
+          </div>
+
+          <!-- ═══════════════════ 7. PRODUCTION ═══════════════════ -->
+
+          <h2 id="production">
+            From migration to production
+            <a class="heading-anchor" href="#production" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            The reason we can present two copilots instead of one is that the architecture is
+            service-oriented and repeatable without exposing business logic as product glue. A
+            production agent service needs clear separation between the model path, domain
+            services, policy assets, authentication, session controls, observability, guardrails,
+            evaluation, and deployment.
+          </p>
+
+          <p>
+            In practical terms, that means teams can migrate or extend OpenAI workloads by
+            changing the model adapter and deployment posture while preserving the surrounding
+            service: identity, audit trails, scoped retrieval, token streaming, artifact
+            generation, monitoring, and human-review controls. Bedrock becomes the governed
+            model path, while the product experience and domain services remain stable.
+          </p>
+
+          <p>
+            Because the model path lives behind Bedrock, choosing OpenAI for the next
+            engagement becomes a platform decision the team can make per workload:
+            <code>openai.gpt-5.5</code> for the hardest reasoning, <code>openai.gpt-5.4</code>
+            for price-performance-sensitive professional work, or an open-weight
+            <code>openai.gpt-oss-120b</code> / <code>openai.gpt-oss-20b</code> model when
+            throughput and cost dominate. The product architecture isolates the adapter from
+            the review workflow, so adapters can change without disturbing the operating model.
+          </p>
+
+          <p>
+            This is the same muscle behind 500+ GenAI and agentic launches since 2023, more
+            than half of which are moving to or already running in production. The launch of
+            OpenAI on Bedrock keeps that playbook intact and adds a powerful new option to
+            the one slot in it that was always meant to be swappable.
+          </p>
+
+          <!-- ═══════════════════ 8. CONCLUSION ═══════════════════ -->
+
+          <h2 id="conclusion">
+            Conclusion
+            <a class="heading-anchor" href="#conclusion" aria-label="Link to section">#</a>
+          </h2>
+
+          <p>
+            OpenAI models on Amazon Bedrock give enterprises a path to build secure, scalable
+            GenAI inside the AWS ecosystem they already trust. The two copilots here make the
+            case in practical terms: one architecture pattern, one human-in-the-loop discipline, two
+            regulated industries, and a model/provider boundary narrow enough to change without
+            rebuilding the product.
+          </p>
+
+          <p>
+            If you're trying to move from AI experimentation to production at scale, this is the
+            conversation we want to have. Let's talk about what an evidence-first copilot looks
+            like for your team, built with OpenAI on Amazon Bedrock by a launch partner who
+            has taken hundreds of GenAI and agentic systems from idea to launch.
+          </p>
+
+          <div class="callout">
+            <p>
+              <strong>Catch the announcement</strong> →
+              <a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/">OpenAI models and Codex on Amazon Bedrock are now generally available</a>.
+              Want to build with OpenAI on Amazon Bedrock? <a href="https://www.loka.com">Let's connect.</a>
+            </p>
+          </div>
+
+          <!-- ═══════════════════ FURTHER READING ═══════════════════ -->
+
+          <h2 id="references">
+            Further reading
+            <a class="heading-anchor" href="#references" aria-label="Link to section">#</a>
+          </h2>
+
+          <ol class="references-list">
+            <li>
+              AWS (2026). <em>OpenAI models and Codex on Amazon Bedrock are now generally available.</em>
+              AWS Machine Learning Blog.
+              <a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/">aws.amazon.com</a>
+            </li>
+            <li>
+              AWS (2026). <em>APIs supported by Amazon Bedrock.</em>
+              API support, endpoints, and model invocation reference.
+              <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/apis.html">docs.aws.amazon.com</a>
+            </li>
+            <li>
+              AWS (2026). <em>Get started with OpenAI GPT-5.5, GPT-5.4 models, and Codex on Amazon Bedrock.</em>
+              AWS News Blog.
+              <a href="https://aws.amazon.com/blogs/aws/get-started-with-openai-gpt-5-5-gpt-5-4-models-and-codex-on-amazon-bedrock/">aws.amazon.com</a>
+            </li>
+            <li>
+              AWS (2026). <em>Inference using Responses API.</em>
+              Amazon Bedrock User Guide.
+              <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html">docs.aws.amazon.com</a>
+            </li>
+            <li>
+              AWS (2026). <em>GPT-5.5 model card.</em>
+              Programmatic access details for the GPT-5.5 Bedrock Mantle endpoint.
+              <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-openai-gpt-55.html">docs.aws.amazon.com</a>
+            </li>
+            <li>
+              OpenAI (2026). <em>OpenAI frontier models and Codex are now available on AWS.</em>
+              <a href="https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws/">openai.com</a>
+            </li>
+            <li>
+              OpenAI (2026). <em>API pricing.</em>
+              Model token pricing, Batch pricing, and reasoning-token billing notes.
+              <a href="https://platform.openai.com/docs/pricing/">platform.openai.com</a>
+            </li>
+            <li>
+              Datacurve (2026). <em>DeepSWE.</em>
+              Long-horizon software engineering benchmark and leaderboard.
+              <a href="https://deepswe.datacurve.ai/">deepswe.datacurve.ai</a>
+            </li>
+            <li>
+              OpenAI (2026). <em>Codex for every role, tool, and workflow.</em>
+              Codex usage and adoption update.
+              <a href="https://openai.com/index/codex-for-every-role-tool-workflow/">openai.com</a>
+            </li>
+          </ol>
+        </article>
+
+        <nav class="paginator" aria-label="Post navigation">
+          <a href="#top">back to top</a>
+        </nav>
+      </main>
+
+      <footer class="site-footer">
+        Petar Kalinovski &middot; Bojan Jakimovski &middot;
+        <img src="https://cdn.worldvectorlogo.com/logos/loka-1.svg" alt="Loka" class="loka-logo" /> &middot; 2026
+      </footer>
+    </div>
+
+    <button class="back-to-top" id="back-to-top" aria-label="Back to top">&#8593;</button>
+
+    <!-- ═══════════════════ JAVASCRIPT ═══════════════════ -->
+    <script>
+      /* ── UI: reading progress, back-to-top, TOC highlight ── */
+      (function () {
+        var progress = document.getElementById("reading-progress");
+        function updateProgress() {
+          var h = document.documentElement.scrollHeight - window.innerHeight;
+          progress.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + "%";
+        }
+
+        var btn = document.getElementById("back-to-top");
+        function updateBtn() {
+          btn.classList.toggle("visible", window.scrollY > 400);
+        }
+        btn.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        var tocLinks = document.querySelectorAll(".toc-list a");
+        var sections = [];
+        tocLinks.forEach(function (link) {
+          var el = document.getElementById(link.getAttribute("href").slice(1));
+          if (el) sections.push({ el: el, link: link });
+        });
+
+        function updateToc() {
+          var pos = window.scrollY + 100,
+            current = null;
+          for (var i = sections.length - 1; i >= 0; i--) {
+            if (sections[i].el.offsetTop <= pos) {
+              current = sections[i];
+              break;
+            }
+          }
+          tocLinks.forEach(function (l) {
+            l.classList.remove("active");
+          });
+          if (current) current.link.classList.add("active");
+        }
+
+        var ticking = false;
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (!ticking) {
+              requestAnimationFrame(function () {
+                updateProgress();
+                updateBtn();
+                updateToc();
+                ticking = false;
+              });
+              ticking = true;
+            }
+          },
+          { passive: true }
+        );
+
+        updateProgress();
+        updateBtn();
+        updateToc();
+      })();
+
+      /* ── Charts ── */
+      (function () {
+        if (typeof Chart === "undefined") return;
+
+        var C = {
+          blue: "#1877f2",   /* Loka primary   */
+          amber: "#f7d046",  /* Loka secondary */
+          green: "#0c6f71",  /* Loka fourth    */
+          gray: "#050516",   /* Loka third     */
+          red: "#ef4444",
+        };
+        var FONT = {
+          family:
+            "'GT America', -apple-system, 'Segoe UI', 'Helvetica Neue', Helvetica, sans-serif",
+        };
+
+        function baseOpts(yLabel, xLabel) {
+          return {
+            responsive: true,
+            maintainAspectRatio: true,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: {
+                position: "top",
+                labels: {
+                  font: { family: FONT.family, size: 12 },
+                  usePointStyle: true,
+                  pointStyle: "line",
+                  boxWidth: 24,
+                },
+              },
+              tooltip: {
+                titleFont: { family: FONT.family },
+                bodyFont: { family: FONT.family },
+              },
+            },
+            scales: {
+              x: {
+                title: { display: !!xLabel, text: xLabel || "", font: { family: FONT.family, size: 12 } },
+                grid: { display: false },
+                ticks: { font: { family: FONT.family, size: 11 } },
+              },
+              y: {
+                title: { display: !!yLabel, text: yLabel || "", font: { family: FONT.family, size: 12 } },
+                grid: { color: "rgba(0,0,0,0.05)" },
+                ticks: { font: { family: FONT.family, size: 11 } },
+              },
+            },
+          };
+        }
+
+        var MONTHS = ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
+
+        var deepswePointLabelPlugin = {
+          id: "deepswePointLabelPlugin",
+          afterDatasetsDraw: function (chart) {
+            var ctx = chart.ctx;
+            ctx.save();
+            ctx.font = "500 11px " + FONT.family;
+            ctx.textBaseline = "middle";
+            chart.data.datasets.forEach(function (dataset, datasetIndex) {
+              var meta = chart.getDatasetMeta(datasetIndex);
+              if (meta.hidden) return;
+              meta.data.forEach(function (point, index) {
+                var raw = dataset.data[index];
+                if (!raw || raw.y == null) return;
+                var dy = datasetIndex === 0 ? -10 : 14;
+                ctx.fillStyle = dataset.borderColor || dataset.backgroundColor || "#333";
+                ctx.fillText(raw.label, point.x + 8, point.y + dy);
+              });
+            });
+            ctx.restore();
+          },
+        };
+
+        /* ── DeepSWE: GPT-5.5 vs Opus 4.8 token efficiency ── */
+        var deepsweEl = document.getElementById("chart-deepswe-efficiency");
+        if (deepsweEl) {
+          new Chart(deepsweEl, {
+            type: "scatter",
+            data: {
+              datasets: [
+                {
+                  label: "GPT-5.5",
+                  borderColor: C.green,
+                  backgroundColor: C.green,
+                  showLine: true,
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  tension: 0.25,
+                  data: [
+                    { x: 18.6, y: 48.0, label: "medium", tokens: "18.6k", cost: "$2.34", time: "9.8m" },
+                    { x: 30.8, y: 61.9, label: "high", tokens: "30.8k", cost: "$4.47", time: "15.4m" },
+                    { x: 47.0, y: 70.0, label: "xhigh", tokens: "47.0k", cost: "$6.61", time: "20.8m" },
+                  ],
+                },
+                {
+                  label: "Claude Opus 4.8",
+                  borderColor: "#c96b24",
+                  backgroundColor: "#c96b24",
+                  showLine: true,
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  tension: 0.25,
+                  data: [
+                    { x: 40.2, y: 47.3, label: "medium", tokens: "40.2k", cost: "$3.25", time: "19.5m" },
+                    { x: 48.2, y: 50.7, label: "high", tokens: "48.2k", cost: "$3.98", time: "20.4m" },
+                    { x: 85.6, y: 57.7, label: "xhigh", tokens: "85.6k", cost: "$7.55", time: "31.6m" },
+                    { x: 136.3, y: 58.2, label: "max", tokens: "136.3k", cost: "$12.58", time: "43.3m" },
+                  ],
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              interaction: { mode: "nearest", intersect: false },
+              plugins: {
+                legend: {
+                  position: "top",
+                  labels: {
+                    font: { family: FONT.family, size: 12 },
+                    usePointStyle: true,
+                  },
+                },
+                tooltip: {
+                  titleFont: { family: FONT.family },
+                  bodyFont: { family: FONT.family },
+                  callbacks: {
+                    title: function (items) {
+                      return items.length ? items[0].dataset.label + " [" + items[0].raw.label + "]" : "";
+                    },
+                    label: function (ctx) {
+                      var raw = ctx.raw;
+                      return raw.y.toFixed(1) + "% pass@1, " + raw.tokens + " out tok, " + raw.cost + ", " + raw.time;
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  reverse: true,
+                  min: 0,
+                  max: 150,
+                  title: { display: true, text: "Mean output tokens per task (k, lower is better)", font: { family: FONT.family, size: 12 } },
+                  grid: { color: "rgba(0,0,0,0.05)" },
+                  ticks: { font: { family: FONT.family, size: 11 } },
+                },
+                y: {
+                  min: 40,
+                  max: 80,
+                  title: { display: true, text: "DeepSWE pass@1", font: { family: FONT.family, size: 12 } },
+                  grid: { color: "rgba(0,0,0,0.05)" },
+                  ticks: {
+                    font: { family: FONT.family, size: 11 },
+                    callback: function (value) { return value + "%"; },
+                  },
+                },
+              },
+            },
+            plugins: [deepswePointLabelPlugin],
+          });
+        }
+
+        /* ── Clinical: criteria status by review (stacked horizontal bar) ── */
+        var clinicalEl = document.getElementById("chart-clinical");
+        if (clinicalEl) {
+          new Chart(clinicalEl, {
+            type: "bar",
+            data: {
+              labels: ["CEC-1003 · Home oxygen", "CEC-1001 · GLP-1 review"],
+              datasets: [
+                { label: "Supported", data: [11, 4], backgroundColor: C.green, borderRadius: 3 },
+                { label: "Needs review", data: [4, 2], backgroundColor: C.amber, borderRadius: 3 },
+                { label: "Missing / gap", data: [2, 1], backgroundColor: C.red, borderRadius: 3 },
+              ],
+            },
+            options: Object.assign(baseOpts("", "Criteria"), {
+              indexAxis: "y",
+              scales: {
+                x: { stacked: true, grid: { color: "rgba(0,0,0,0.05)" }, ticks: { font: { family: FONT.family, size: 11 }, precision: 0 } },
+                y: { stacked: true, grid: { display: false }, ticks: { font: { family: FONT.family, size: 11 } } },
+              },
+            }),
+          });
+        }
+
+        /* ── FSI: Atlas DSCR vs policy threshold ── */
+        var dscrEl = document.getElementById("chart-dscr");
+        if (dscrEl) {
+          new Chart(dscrEl, {
+            type: "line",
+            data: {
+              labels: MONTHS,
+              datasets: [
+                {
+                  label: "Atlas monthly DSCR",
+                  data: [1.31, 1.21, 1.11, 1.26, 1.18, 1.08],
+                  borderColor: C.blue,
+                  backgroundColor: "rgba(24,119,242,0.10)",
+                  borderWidth: 2,
+                  pointRadius: 3,
+                  pointHoverRadius: 5,
+                  tension: 0.3,
+                  fill: true,
+                },
+                {
+                  label: "Policy threshold (1.25×)",
+                  data: [1.25, 1.25, 1.25, 1.25, 1.25, 1.25],
+                  borderColor: C.red,
+                  borderWidth: 1.5,
+                  borderDash: [5, 4],
+                  pointRadius: 0,
+                  tension: 0,
+                },
+              ],
+            },
+            options: Object.assign(baseOpts("DSCR (×)", "Month (Nov 2025 – Apr 2026)"), {}),
+          });
+        }
+
+        /* ── FSI: wire-count spike (Atlas vs Northstar) ── */
+        var wiresEl = document.getElementById("chart-wires");
+        if (wiresEl) {
+          new Chart(wiresEl, {
+            type: "line",
+            data: {
+              labels: MONTHS,
+              datasets: [
+                {
+                  label: "Atlas (SBL) wire count",
+                  data: [6, 7, 5, 8, 9, 17],
+                  borderColor: C.blue,
+                  backgroundColor: "transparent",
+                  borderWidth: 2,
+                  pointRadius: 3,
+                  pointHoverRadius: 5,
+                  tension: 0.3,
+                },
+                {
+                  label: "Northstar (AML) wire count",
+                  data: [4, 6, 5, 7, 8, 19],
+                  borderColor: C.amber,
+                  backgroundColor: "transparent",
+                  borderWidth: 2,
+                  pointRadius: 3,
+                  pointHoverRadius: 5,
+                  tension: 0.3,
+                },
+              ],
+            },
+            options: Object.assign(baseOpts("Outgoing wires / month", "Month (Nov 2025 – Apr 2026)"), {}),
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
