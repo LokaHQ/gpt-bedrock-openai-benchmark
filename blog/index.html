@@ -928,7 +928,6 @@
     <div class="shell">
       <main id="main" class="post">
         <section class="post-heading">
-          <span class="post-eyebrow">OpenAI on Amazon Bedrock · Launch Partner</span>
           <h1 class="post-title">
             <span class="post-title-main">OpenAI on AWS:<br />What Enterprises Can Build Next</span>
             <span class="post-title-sub">a launch-partner build report from Loka</span>
@@ -950,7 +949,7 @@
           <ul class="resource-links">
             <li><a href="https://openai.com/index/openai-on-aws/" aria-label="OpenAI and AWS partnership announcement"><img class="brand brand-openai" src="assets/openai-logo.svg" alt="OpenAI" /></a></li>
             <li><a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/" aria-label="Launch announcement on AWS"><img class="brand brand-aws" src="assets/aws-logo.svg" alt="Amazon Web Services" /></a></li>
-            <li><a href="https://www.loka.com" aria-label="Loka"><img class="brand brand-loka" src="https://cdn.worldvectorlogo.com/logos/loka-1.svg" alt="Loka" /></a></li>
+            <li><a href="https://www.loka.com/blog/loka-named-a-global-launch-partner-for-openai-models-on-amazon-bedrock" aria-label="Loka"><img class="brand brand-loka" src="assets/loka-logo.svg" alt="Loka" /></a></li>
           </ul>
         </section>
 
@@ -984,7 +983,7 @@
           <p>
             OpenAI <strong>GPT-5.5, GPT-5.4, and Codex</strong> are now generally
             available on <strong>Amazon Bedrock</strong>. For enterprises, that is more than
-            a new catalog entry: it creates a path to use OpenAI capabilities inside the AWS
+            a new catalog entry. It creates a path to use OpenAI capabilities inside the AWS
             security, governance, procurement, and operational controls they already run.
             Loka is one of only five OpenAI launch partners globally, giving us a front-row
             role in helping customers turn this new path into production systems.
@@ -999,12 +998,22 @@
           </p>
 
           <p>
-            A launch is easy to celebrate and hard to substantiate. So this post is a build
-            report grounded in what we built. We used Loka's production agent architecture and
-            delivery patterns to stand up <em>two</em> copilots for two of the most heavily
-            regulated industries we work in. The point is not to expose implementation
-            mechanics; it is to show how authentication, scoped data access, observability,
-            guardrails, deployment, and human review can travel across use cases:
+            A launch is easy to celebrate and hard to substantiate. So before we built
+            anything, we asked the foundational question: does routing GPT-5.5 through
+            Amazon Bedrock change the model you get? We ran the full GSM8K test split
+            (1,319 questions) through both provider paths at three reasoning levels and
+            compared accuracy, latency, throughput, and reliability head to head. Only after
+            that benchmark confirmed parity — same answer quality, faster serving, zero
+            failures on Bedrock — did we move to the build phase.
+          </p>
+
+          <p>
+            That build phase is a report grounded in what we actually shipped. We used
+            Loka's production agent architecture and delivery patterns to stand up
+            <em>two</em> copilots for two of the most heavily regulated industries we work
+            in. The point is not to expose implementation mechanics; it is to show how
+            authentication, scoped data access, observability, guardrails, deployment, and
+            human review can travel across use cases:
           </p>
 
           <ul>
@@ -1022,16 +1031,17 @@
             They share production obligations: governed access, traceability, guardrails,
             deployment discipline, and, most importantly, a human-review boundary.
             <strong>Both prepare evidence for a human; neither makes the decision.</strong>
-            The domain services and data sources differ by use case, but with OpenAI now
-            generally available on Bedrock, the model/provider choice can stay inside the
-            enterprise platform strategy instead of becoming a separate AI platform decision.
+            The domain services and data sources differ by use case, but the validated
+            model path is the same: OpenAI on Bedrock, benchmarked before it was trusted
+            with production workloads.
           </p>
 
           <div class="callout">
             <p>
               <strong>What we want you to take away.</strong> The useful unlock is the
               combination: a model-agnostic production architecture, Bedrock's governance
-              surface, and OpenAI-compatible APIs. Together, they let teams
+              surface, and OpenAI-compatible APIs — all verified to be production-grade
+              before the first line of copilot code was written. Together, they let teams
               move regulated workloads from prototype to production while preserving the AWS
               controls their security and platform teams already understand.
             </p>
@@ -1322,104 +1332,10 @@
               <strong>Scope of these numbers.</strong> One model (GPT-5.5), one Bedrock Region
               (<code>us-east-2</code>), one client location, sequential single-stream
               requests, short math prompts, measured in June 2026. Latency and error rates are
-              point-in-time properties of a serving fleet, not constants. Treat this as a
-              repeatable harness — the scripts are in the repo — and rerun it against your own
-              region, workload shape, and concurrency before committing an SLO to it.
+              point-in-time properties of a serving fleet, not constants — rerun against your
+              own region, workload shape, and concurrency before committing an SLO to these.
             </p>
           </div>
-
-          <h3>How the benchmark works</h3>
-
-          <p>
-            The benchmark script is checked into this repo at
-            <code>scripts/benchmark_openai_latency.py</code>. For the Bedrock runs, it uses
-            <code>BEDROCK_OPENAI_API_KEY</code> or <code>AWS_BEARER_TOKEN_BEDROCK</code>
-            when a Bedrock API key is available, and otherwise falls back to AWS SigV4
-            credentials for direct HTTP requests. It also sets <code>store: false</code>
-            because the benchmark does not need Responses API conversation state.
-          </p>
-
-          <pre><code>uv run python scripts/benchmark_openai_latency.py \
-  --provider bedrock \
-  --region us-east-2 \
-  --runs 30 \
-  --warmups 5 \
-  --reasoning-effort medium \
-  --max-output-tokens 180</code></pre>
-
-          <p>
-            The output lands in <code>result/openai_responses_latency_*.jsonl</code> and
-            <code>result/openai_responses_latency_*_summary.json</code>, with a readable
-            Markdown report at <code>result/openai_responses_latency_*.md</code>. The report
-            follows the useful part of the LLMPerf pattern: keep per-invocation records, then
-            publish aggregate p50, p90, and p95 metrics for time to first token, end-to-end
-            latency, output throughput, input tokens, output tokens, and reasoning tokens.
-            Accuracy is scored separately by <code>scripts/score_gsm8k_accuracy.py</code>
-            against the same per-invocation records, so every number in this section traces
-            back to a raw JSONL line in <code>result/</code>.
-          </p>
-
-          <h3>Credit sizing before we opened the OpenAI account</h3>
-
-          <p>
-            We also added a small eval-cost estimator for the OpenAI side. It uses the public
-            tokenizer path through <code>tiktoken</code> when available, counts the prompt
-            tokens for a benchmark dataset, then applies the current per-token model pricing.
-            For a first pass on <strong>GSM8K test</strong> (1,319 questions), using a
-            conservative budget of 256 visible output tokens plus 256 reasoning-output tokens
-            per sample, the expected credit requirement is small enough to approve without
-            guesswork:
-          </p>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Samples</th>
-                <th>Avg input tokens</th>
-                <th>Output budget</th>
-                <th>Standard API cost</th>
-                <th>Batch API cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>gpt-5.4</code></td>
-                <td>1,319</td>
-                <td>93.5</td>
-                <td>512 / sample</td>
-                <td>$10.44</td>
-                <td>$5.22</td>
-              </tr>
-              <tr>
-                <td><code>gpt-5.5</code></td>
-                <td>1,319</td>
-                <td>93.5</td>
-                <td>512 / sample</td>
-                <td>$20.88</td>
-                <td>$10.44</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <pre><code>uv run --with tiktoken python scripts/estimate_openai_eval_cost.py \
-  --dataset gsm8k \
-  --split test \
-  --model gpt-5.4 \
-  --model gpt-5.5 \
-  --visible-output-tokens 256 \
-  --reasoning-output-tokens 256</code></pre>
-
-          <p>
-            The estimate is deliberately transparent: output budget dominates the cost, and
-            hidden reasoning tokens are billed as output tokens. The script writes both JSON
-            and Markdown summaries under <code>result/openai_eval_cost_*.json</code> and
-            <code>result/openai_eval_cost_*.md</code>, so we can rerun it with different
-            output budgets, models, or datasets before buying credits. The estimate held up:
-            the measured GSM8K runs on the OpenAI API came in at $5.72 (medium), $6.90 (high),
-            and $9.54 (xhigh) — under the conservative $20.88 ceiling, because real responses
-            used far fewer output tokens than the 512-token budget assumed.
-          </p>
 
           <h3>What gets easier with OpenAI on Bedrock</h3>
 
