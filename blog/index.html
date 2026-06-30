@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Theme: default is light. Apply a stored dark preference before paint (no flash). OS preference is ignored. -->
     <script>
       (function () {
         try { if (localStorage.getItem("loka-theme") === "dark") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
@@ -33,71 +32,48 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
     :root {
-      /* Functional UI neutrals — near-white + cool-tinted toward the brand blue/black
-           family (no pure white/black; cool-only). Brand --c-* tokens below stay exact. */
       --bg: #fcfcfd;
-      /* near-white */
       --bg-soft: #f4f5f7;
       --bg-code: #f2f3f6;
       --fg: #16181f;
-      /* cool near-black */
       --fg-2: #33353e;
       --fg-3: #61636d;
       --fg-4: #9799a3;
       --line: #e5e5e5;
-      /* = official brand grey (--c-grey) */
       --line-strong: #cfd0d7;
       --accent: #1877f2;
-      /* Loka primary blue — links & accents */
       --link: #1877f2;
       --max-content: 680px;
-      /* readable column width */
       --max-wide: 900px;
-      /* wide figures / charts */
       --max-cover: 960px;
-      /* cover image */
       --toc-width: 200px;
       --toc-gap: 40px;
       --font-sans: "Alliance No.2", "Archivo", -apple-system, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif;
       --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", Consolas, monospace;
-      /* ── Loka brand palette (official HEX from the Loka Brand Style Guide) ──
-           Usage hierarchy: blue is primary — use it before any other color, to support
-           black & white. Green is the primary accent, yellow the second accent; both are
-           for graphs/highlights only. Red is NOT a brand color (failure states only). */
       --c-blue: #1877f2;
-      /* Loka primary — use before any other color */
       --c-teal: #0c6f71;
-      /* Loka green — primary accent (graphs/highlights only) */
       --c-yellow: #f7d043;
-      /* Loka yellow — secondary accent (graphs/highlights only) */
       --c-black: #050517;
-      /* Loka black */
       --c-grey: #e5e5e5;
-      /* Loka grey */
       --c-red: #ef4444;
-      /* not a brand color — failure/collapse states only */
       --c-purple: #8b5cf6;
       --c-gray: #6b7280;
     }
 
-    /* ── Dark theme ── Default is light; this only applies when <html data-theme="dark">.
-       Cool-tinted near-black/near-white (no pure #000/#fff); brand --c-* tokens stay exact.
-       Hardcoded surfaces (status pills, output boxes, SVG diagrams) are remapped further down. */
     :root[data-theme="dark"] {
-      --bg: #14161c;        /* cool near-black */
-      --bg-soft: #1d2029;   /* dark containers lift ~12% over bg */
+      --bg: #14161c;
+      --bg-soft: #1d2029;
       --bg-code: #1a1c24;
-      --fg: #e9eaf1;        /* cool near-white (not pure) */
+      --fg: #e9eaf1;
       --fg-2: #c3c6d1;
       --fg-3: #969aa8;
       --fg-4: #6c6f7c;
-      --line: #2b2e38;      /* contrasts both bg and content */
+      --line: #2b2e38;
       --line-strong: #3b3e4a;
-      --accent: #4f93f7;    /* lightened brand blue for contrast on dark */
+      --accent: #4f93f7;
       --link: #5b9dff;
     }
 
-    /* Dark theme — overrides for surfaces that use hardcoded colors (not the vars above). */
     [data-theme="dark"] .status-pill.ok     { color: #86efac; background: #0f2017; border-color: #1f5135; }
     [data-theme="dark"] .status-pill.review { color: #fcd34d; background: #241a07; border-color: #5a4310; }
     [data-theme="dark"] .status-pill.gap    { color: #fca5a5; background: #2a1314; border-color: #5e2526; }
@@ -106,22 +82,18 @@
     [data-theme="dark"] .output-box-header.bad  { color: #fca5a5; background: #2a1314; border-bottom-color: #5e2526; }
     [data-theme="dark"] .output-box-header.info { color: #93c5fd; background: #11203a; border-bottom-color: #1e3a64; }
 
-    /* Inline-SVG architecture diagrams */
     [data-theme="dark"] .frame      { fill: #1d2029; stroke: #3b3e4a; }
     [data-theme="dark"] .shared     { fill: #15171d; stroke: #3b3e4a; }
     [data-theme="dark"] .accent-box { fill: #12223d; stroke: #4f93f7; }
     [data-theme="dark"] .alt-box    { fill: #0c241f; stroke: #2aa3a5; }
-    [data-theme="dark"] .dark       { fill: #050517; stroke: #3b3e4a; }   /* keep dark core, delineate from bg */
+    [data-theme="dark"] .dark       { fill: #050517; stroke: #3b3e4a; }
     [data-theme="dark"] .line       { stroke: #6c6f7c; }
-    [data-theme="dark"] svg text    { fill: var(--fg); }                  /* SVG text defaults to black */
+    [data-theme="dark"] svg text    { fill: var(--fg); }
 
-    /* Charts keep a light card in both themes so brand series colors stay exact. */
     [data-theme="dark"] .chart-frame { background: #fcfcfd; border-color: #cfd0d7; }
 
-    /* Brand logo: white on dark (blue on light is set on .loka-logo below). */
     [data-theme="dark"] .loka-logo { color: #fff; }
 
-    /* Partner brand-logo pills are dark artwork; render them white so they stay legible on dark. */
     [data-theme="dark"] .resource-links .brand { filter: brightness(0) invert(1); }
 
     *,
@@ -149,7 +121,6 @@
       color: var(--link);
     }
 
-    /* ── Reading progress ── */
     .reading-progress {
       position: fixed;
       top: 0;
@@ -161,7 +132,6 @@
       transition: width 0.1s linear;
     }
 
-    /* ── Layout ── */
     .shell {
       min-height: 100vh;
     }
@@ -173,7 +143,6 @@
       position: relative;
     }
 
-    /* ── Header ── */
     .post-heading {
       text-align: center;
       max-width: var(--max-content);
@@ -200,7 +169,6 @@
       color: var(--fg-2);
     }
 
-    /* Flex + center so a single author is centered, and 2+ authors are centered as a group. */
     .authors {
       display: flex;
       flex-wrap: wrap;
@@ -302,7 +270,6 @@
       height: 2rem;
     }
 
-    /* Brand logo pills (e.g. partner logos in the resource bar) */
     .resource-links .brand {
       display: block;
       width: auto;
@@ -326,7 +293,6 @@
       height: 1rem;
     }
 
-    /* ── Cover ── */
     .post-cover {
       max-width: var(--max-cover);
       margin: 2.2rem auto 2.5rem;
@@ -340,14 +306,12 @@
       border: 1px solid var(--line);
     }
 
-    /* ── Article ── */
     article.content {
       max-width: var(--max-content);
       margin: 0 auto;
       position: relative;
     }
 
-    /* ── Callout ── */
     .callout {
       border-left: 3px solid var(--accent);
       padding: 0.8rem 1.1rem;
@@ -381,9 +345,6 @@
       border-left-color: var(--c-yellow);
     }
 
-    /* yellow accent for caveats/warnings */
-
-    /* ── Equations ── */
     .equation {
       margin: 0.9rem 0 1.1rem;
       padding: 0.65rem 1rem;
@@ -398,7 +359,6 @@
       font-size: 1.05em;
     }
 
-    /* ── Wide figures & charts ── */
     .figure-wide {
       max-width: var(--max-wide);
       margin-left: calc((var(--max-content) - var(--max-wide)) / 2);
@@ -417,7 +377,6 @@
       background: var(--bg);
     }
 
-    /* ── Video ── */
     .video-figure video {
       width: 100%;
       height: auto;
@@ -427,7 +386,6 @@
       background: #000;
     }
 
-    /* ── Left TOC ── */
     .left-toc {
       position: sticky;
       top: 2rem;
@@ -481,7 +439,6 @@
       font-weight: 500;
     }
 
-    /* ── Content typography ── */
     .content p,
     .content ul,
     .content ol,
@@ -492,8 +449,6 @@
       margin: 0 0 1.3rem;
     }
 
-    /* Heading scale: size+weight carry h1–h4; h5/h6 become small uppercase labels.
-         Letter-spacing tightens on large text and opens up on the small uppercase ones. */
     .content h2,
     .content h3,
     .content h4,
@@ -619,7 +574,6 @@
       border-radius: 0;
     }
 
-    /* ── Tables ── */
     .content table {
       width: 100%;
       border-collapse: collapse;
@@ -650,7 +604,6 @@
       font-size: 0.8rem;
     }
 
-    /* ── Status pills (for table cells: ok / review / gap) ── */
     .status-pill {
       font-family: var(--font-sans);
       font-size: 0.72rem;
@@ -678,7 +631,6 @@
       border: 1px solid #fecaca;
     }
 
-    /* ── Figures ── */
     .content figure {
       margin-top: 1.6rem;
     }
@@ -698,7 +650,6 @@
       text-align: center;
     }
 
-    /* ── Citation ── */
     .citation-block {
       margin-top: 0.5rem;
     }
@@ -720,7 +671,6 @@
       color: var(--fg-2);
     }
 
-    /* ── References ── */
     .references-list {
       margin-left: 1.4rem;
       padding: 0;
@@ -742,7 +692,6 @@
       color: var(--fg-3);
     }
 
-    /* ── Paginator ── */
     .paginator {
       max-width: var(--max-content);
       margin: 2.5rem auto 0;
@@ -765,7 +714,6 @@
       color: var(--fg);
     }
 
-    /* ── Back to top ── */
     .back-to-top {
       position: fixed;
       bottom: 2rem;
@@ -798,7 +746,6 @@
       border-color: var(--accent);
     }
 
-    /* ── Theme toggle (fixed top-right) ── */
     .theme-toggle {
       position: fixed;
       top: 1rem;
@@ -827,7 +774,6 @@
       height: 18px;
     }
 
-    /* Show the icon for the theme you'd switch TO: moon in light, sun in dark. */
     .theme-toggle .icon-sun {
       display: none;
     }
@@ -840,14 +786,13 @@
       display: block;
     }
 
-    /* ── Loka logo ── */
     .loka-logo {
       display: inline-block;
       height: 1.15em;
       width: auto;
       vertical-align: -0.15em;
       margin-right: 0.15em;
-      color: var(--c-blue);   /* blue wordmark on light; dark theme overrides to white */
+      color: var(--c-blue);
     }
 
     .site-footer .loka-logo {
@@ -855,9 +800,6 @@
       vertical-align: -0.1em;
     }
 
-    /* ── Footer ── */
-    /* No border-top here: the paginator above already provides the divider — avoid two
-         hard divides next to each other. Separation from the paginator is by whitespace. */
     .site-footer {
       max-width: var(--max-content);
       margin: 0 auto;
@@ -877,7 +819,6 @@
       color: var(--fg);
     }
 
-    /* ── Output comparison (good vs bad side-by-side) ── */
     .output-comparison {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -930,7 +871,6 @@
       font-size: 0.78rem;
     }
 
-    /* ── Inline SVG architecture diagram classes ── */
     .frame {
       fill: #fff;
       stroke: #d0d0d0;
@@ -949,14 +889,12 @@
       stroke-width: 1.5;
     }
 
-    /* primary-tinted node */
     .alt-box {
       fill: #f0fdf4;
       stroke: #0c6f71;
       stroke-width: 1.5;
     }
 
-    /* teal-tinted node */
     .dark {
       fill: #050517;
       stroke: #050517;
@@ -972,7 +910,6 @@
       font-weight: 500;
     }
 
-    /* ── Responsive ── */
     @media (max-width: 1100px) {
       .left-toc {
         display: none;
@@ -1066,7 +1003,6 @@
   </style>
   </head>
   <body>
-    <!-- Official Loka wordmark (blue) - defined once; rendered in the header and footer via <use>. -->
   <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
     <symbol id="loka-wordmark" viewBox="0 0 102 33">
       <path d="M99.9188 22.3945C100.278 22.396 100.632 22.4881 100.946 22.6624C101.271 22.8377 101.539 23.1027 101.718 23.4258C101.902 23.7426 101.999 24.1018 102 24.4678C102.003 24.8299 101.91 25.1864 101.731 25.5017C101.553 25.8243 101.286 26.0899 100.962 26.2678C100.647 26.4468 100.29 26.5409 99.9268 26.5409C99.5638 26.5409 99.2071 26.4468 98.8916 26.2678C98.5684 26.0891 98.302 25.8237 98.1226 25.5017C97.9437 25.1865 97.8509 24.8299 97.8537 24.4678C97.8505 24.103 97.9432 23.7438 98.1226 23.4258C98.3026 23.1031 98.5712 22.8383 98.897 22.6624C99.2095 22.4887 99.561 22.3966 99.9188 22.3945V22.3945ZM99.9188 22.8017C99.6308 22.8028 99.3477 22.8766 99.096 23.016C98.8343 23.157 98.6187 23.3699 98.4749 23.6294C98.3276 23.8845 98.2497 24.1735 98.249 24.4678C98.2485 24.759 98.3245 25.0453 98.4695 25.2982C98.6137 25.5578 98.8279 25.7722 99.0879 25.9169C99.3412 26.0604 99.6274 26.1361 99.9188 26.1366C100.21 26.1375 100.497 26.0617 100.75 25.9169C101.011 25.773 101.226 25.5585 101.371 25.2982C101.516 25.0453 101.592 24.759 101.591 24.4678C101.591 24.1735 101.513 23.8845 101.365 23.6294C101.222 23.3686 101.005 23.1553 100.742 23.016C100.491 22.8764 100.209 22.8027 99.9215 22.8017H99.9188ZM98.9777 25.5767V23.3776H99.4267C99.8462 23.3776 100.08 23.3776 100.131 23.3776C100.251 23.3833 100.368 23.4133 100.475 23.466C100.563 23.5158 100.635 23.5891 100.682 23.6776C100.739 23.7724 100.768 23.8809 100.766 23.991C100.769 24.1426 100.713 24.2896 100.61 24.4008C100.493 24.5195 100.338 24.5934 100.172 24.6098C100.228 24.629 100.28 24.657 100.327 24.6928C100.383 24.7437 100.432 24.8003 100.475 24.8615C100.492 24.883 100.548 24.9714 100.639 25.1294L100.908 25.5714H100.354L100.169 25.2151C100.095 25.0461 99.9905 24.8925 99.8596 24.7624C99.7699 24.6978 99.6611 24.6648 99.5504 24.6687H99.4348V25.5714L98.9777 25.5767ZM99.4267 24.3285H99.6069C99.768 24.3367 99.9296 24.3259 100.088 24.2964C100.148 24.2797 100.201 24.244 100.239 24.1946C100.274 24.1451 100.292 24.0862 100.293 24.0258C100.293 23.9669 100.274 23.9095 100.239 23.8624C100.202 23.8121 100.149 23.7761 100.088 23.7606C99.9299 23.7285 99.7681 23.7168 99.6069 23.7258H99.4267V24.3285Z" fill="currentColor"/>
@@ -1104,8 +1040,8 @@
           </div>
           <p class="post-date"><time datetime="2026-06">June 2026</time></p>
           <ul class="resource-links">
-            <li><a href="https://openai.com/index/openai-on-aws/" aria-label="OpenAI and AWS partnership announcement"><img class="brand brand-openai" src="https://cdn.worldvectorlogo.com/logos/openai-wordmark.svg" alt="OpenAI" /></a></li>
-            <li><a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/" aria-label="Launch announcement on AWS"><img class="brand brand-aws" src="https://cdn.worldvectorlogo.com/logos/aws-2.svg" alt="Amazon Web Services" /></a></li>
+            <li><a href="https://openai.com/index/openai-on-aws/" aria-label="OpenAI and AWS partnership announcement"><svg class="brand brand-openai" viewBox="-4.126838974812941 0.900767442746961 939.436838974813 230.18142889845947" aria-hidden="true"><path d="M667.21 90.58c-13.76 0-23.58 4.7-28.4 13.6l-2.59 4.82V92.9h-22.39v97.86h23.55v-58.22c0-13.91 7.56-21.89 20.73-21.89 12.56 0 19.76 7.77 19.76 21.31v58.8h23.56v-63c0-23.3-12.79-37.18-34.22-37.18zm-114.21 0c-27.79 0-45 17.34-45 45.25v13.74c0 26.84 17.41 43.51 45.44 43.51 18.75 0 31.89-6.87 40.16-21l-14.6-8.4c-6.11 8.15-15.87 13.2-25.55 13.2-14.19 0-22.66-8.76-22.66-23.44v-3.89h65.73v-16.23c0-26-17.07-42.74-43.5-42.74zm22.09 43.15h-44.38v-2.35c0-16.11 7.91-25 22.27-25 13.83 0 22.09 8.76 22.09 23.44zm360.22-56.94V58.07h-81.46v18.72h28.56V172h-28.56v18.72h81.46V172h-28.57V76.79zM317.65 55.37c-36.38 0-59 22.67-59 59.18v19.74c0 36.5 22.61 59.18 59 59.18s59-22.68 59-59.18v-19.74c-.01-36.55-22.65-59.18-59-59.18zm34.66 80.27c0 24.24-12.63 38.14-34.66 38.14S283 159.88 283 135.64v-22.45c0-24.24 12.64-38.14 34.66-38.14s34.66 13.9 34.66 38.14zm98.31-45.06c-12.36 0-23.06 5.12-28.64 13.69l-2.53 3.9V92.9h-22.4v131.53h23.56v-47.64l2.52 3.74c5.3 7.86 15.65 12.55 27.69 12.55 20.31 0 40.8-13.27 40.8-42.93v-16.64c0-21.37-12.63-42.93-41-42.93zM468.06 149c0 15.77-9.2 25.57-24 25.57-13.8 0-23.43-10.36-23.43-25.18v-14.72c0-15 9.71-25.56 23.63-25.56 14.69 0 23.82 9.79 23.82 25.56zm298.47-90.92L719 190.76h23.93l9.1-28.44h54.64l.09.28 9 28.16h23.92L792.07 58.07zm-8.66 85.53l21.44-67.08 21.22 67.08zM212.59 95.12a57.27 57.27 0 0 0-4.92-47.05 58 58 0 0 0-62.4-27.79A57.29 57.29 0 0 0 102.06 1a57.94 57.94 0 0 0-55.27 40.14A57.31 57.31 0 0 0 8.5 68.93a58 58 0 0 0 7.13 67.94 57.31 57.31 0 0 0 4.92 47A58 58 0 0 0 83 211.72 57.31 57.31 0 0 0 126.16 231a57.94 57.94 0 0 0 55.27-40.14 57.3 57.3 0 0 0 38.28-27.79 57.92 57.92 0 0 0-7.12-67.95zM126.16 216a42.93 42.93 0 0 1-27.58-10c.34-.19 1-.52 1.38-.77l45.8-26.44a7.43 7.43 0 0 0 3.76-6.51V107.7l19.35 11.17a.67.67 0 0 1 .38.54v53.45A43.14 43.14 0 0 1 126.16 216zm-92.59-39.54a43 43 0 0 1-5.15-28.88c.34.21.94.57 1.36.81l45.81 26.45a7.44 7.44 0 0 0 7.52 0L139 142.52v22.34a.67.67 0 0 1-.27.6l-46.3 26.72a43.14 43.14 0 0 1-58.86-15.77zm-12-100A42.92 42.92 0 0 1 44 57.56V112a7.45 7.45 0 0 0 3.76 6.51l55.9 32.28L84.24 162a.68.68 0 0 1-.65.06L37.3 135.33a43.13 43.13 0 0 1-15.77-58.87zm159 37l-55.9-32.28L144 70a.69.69 0 0 1 .65-.06l46.29 26.73a43.1 43.1 0 0 1-6.66 77.76V120a7.44 7.44 0 0 0-3.74-6.54zm19.27-29c-.34-.21-.94-.57-1.36-.81L152.67 57.2a7.44 7.44 0 0 0-7.52 0l-55.9 32.27V67.14a.73.73 0 0 1 .28-.6l46.29-26.72a43.1 43.1 0 0 1 64 44.65zM78.7 124.3l-19.36-11.17a.73.73 0 0 1-.37-.54V59.14A43.09 43.09 0 0 1 129.64 26c-.34.19-.95.52-1.38.77l-45.8 26.44a7.45 7.45 0 0 0-3.76 6.51zm10.51-22.67l24.9-14.38L139 101.63v28.74l-24.9 14.38-24.9-14.38z"/></svg></a></li>
+            <li><a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/" aria-label="Launch announcement on AWS"><svg class="brand brand-aws" viewBox="-.1 1.1 304.9 179.8" aria-hidden="true"><path d="m86.4 66.4c0 3.7.4 6.7 1.1 8.9.8 2.2 1.8 4.6 3.2 7.2.5.8.7 1.6.7 2.3 0 1-.6 2-1.9 3l-6.3 4.2c-.9.6-1.8.9-2.6.9-1 0-2-.5-3-1.4-1.4-1.5-2.6-3.1-3.6-4.7-1-1.7-2-3.6-3.1-5.9-7.8 9.2-17.6 13.8-29.4 13.8-8.4 0-15.1-2.4-20-7.2s-7.4-11.2-7.4-19.2c0-8.5 3-15.4 9.1-20.6s14.2-7.8 24.5-7.8c3.4 0 6.9.3 10.6.8s7.5 1.3 11.5 2.2v-7.3c0-7.6-1.6-12.9-4.7-16-3.2-3.1-8.6-4.6-16.3-4.6-3.5 0-7.1.4-10.8 1.3s-7.3 2-10.8 3.4c-1.6.7-2.8 1.1-3.5 1.3s-1.2.3-1.6.3c-1.4 0-2.1-1-2.1-3.1v-4.9c0-1.6.2-2.8.7-3.5s1.4-1.4 2.8-2.1c3.5-1.8 7.7-3.3 12.6-4.5 4.9-1.3 10.1-1.9 15.6-1.9 11.9 0 20.6 2.7 26.2 8.1 5.5 5.4 8.3 13.6 8.3 24.6v32.4zm-40.6 15.2c3.3 0 6.7-.6 10.3-1.8s6.8-3.4 9.5-6.4c1.6-1.9 2.8-4 3.4-6.4s1-5.3 1-8.7v-4.2c-2.9-.7-6-1.3-9.2-1.7s-6.3-.6-9.4-.6c-6.7 0-11.6 1.3-14.9 4s-4.9 6.5-4.9 11.5c0 4.7 1.2 8.2 3.7 10.6 2.4 2.5 5.9 3.7 10.5 3.7zm80.3 10.8c-1.8 0-3-.3-3.8-1-.8-.6-1.5-2-2.1-3.9l-23.5-77.3c-.6-2-.9-3.3-.9-4 0-1.6.8-2.5 2.4-2.5h9.8c1.9 0 3.2.3 3.9 1 .8.6 1.4 2 2 3.9l16.8 66.2 15.6-66.2c.5-2 1.1-3.3 1.9-3.9s2.2-1 4-1h8c1.9 0 3.2.3 4 1 .8.6 1.5 2 1.9 3.9l15.8 67 17.3-67c.6-2 1.3-3.3 2-3.9.8-.6 2.1-1 3.9-1h9.3c1.6 0 2.5.8 2.5 2.5 0 .5-.1 1-.2 1.6s-.3 1.4-.7 2.5l-24.1 77.3c-.6 2-1.3 3.3-2.1 3.9s-2.1 1-3.8 1h-8.6c-1.9 0-3.2-.3-4-1s-1.5-2-1.9-4l-15.5-64.5-15.4 64.4c-.5 2-1.1 3.3-1.9 4s-2.2 1-4 1zm128.5 2.7c-5.2 0-10.4-.6-15.4-1.8s-8.9-2.5-11.5-4c-1.6-.9-2.7-1.9-3.1-2.8s-.6-1.9-.6-2.8v-5.1c0-2.1.8-3.1 2.3-3.1.6 0 1.2.1 1.8.3s1.5.6 2.5 1c3.4 1.5 7.1 2.7 11 3.5 4 .8 7.9 1.2 11.9 1.2 6.3 0 11.2-1.1 14.6-3.3s5.2-5.4 5.2-9.5c0-2.8-.9-5.1-2.7-7s-5.2-3.6-10.1-5.2l-14.5-4.5c-7.3-2.3-12.7-5.7-16-10.2-3.3-4.4-5-9.3-5-14.5 0-4.2.9-7.9 2.7-11.1s4.2-6 7.2-8.2c3-2.3 6.4-4 10.4-5.2s8.2-1.7 12.6-1.7c2.2 0 4.5.1 6.7.4 2.3.3 4.4.7 6.5 1.1 2 .5 3.9 1 5.7 1.6s3.2 1.2 4.2 1.8c1.4.8 2.4 1.6 3 2.5.6.8.9 1.9.9 3.3v4.7c0 2.1-.8 3.2-2.3 3.2-.8 0-2.1-.4-3.8-1.2-5.7-2.6-12.1-3.9-19.2-3.9-5.7 0-10.2.9-13.3 2.8s-4.7 4.8-4.7 8.9c0 2.8 1 5.2 3 7.1s5.7 3.8 11 5.5l14.2 4.5c7.2 2.3 12.4 5.5 15.5 9.6s4.6 8.8 4.6 14c0 4.3-.9 8.2-2.6 11.6-1.8 3.4-4.2 6.4-7.3 8.8-3.1 2.5-6.8 4.3-11.1 5.6-4.5 1.4-9.2 2.1-14.3 2.1z" fill="#252f3e"/><g clip-rule="evenodd" fill="#f90" fill-rule="evenodd"><path d="m273.5 143.7c-32.9 24.3-80.7 37.2-121.8 37.2-57.6 0-109.5-21.3-148.7-56.7-3.1-2.8-.3-6.6 3.4-4.4 42.4 24.6 94.7 39.5 148.8 39.5 36.5 0 76.6-7.6 113.5-23.2 5.5-2.5 10.2 3.6 4.8 7.6z"/><path d="m287.2 128.1c-4.2-5.4-27.8-2.6-38.5-1.3-3.2.4-3.7-2.4-.8-4.5 18.8-13.2 49.7-9.4 53.3-5 3.6 4.5-1 35.4-18.6 50.2-2.7 2.3-5.3 1.1-4.1-1.9 4-9.9 12.9-32.2 8.7-37.5z"/></g></svg></a></li>
           </ul>
         </section>
 
@@ -1129,8 +1065,6 @@
               <li><a href="#references">Further reading</a></li>
             </ul>
           </nav>
-
-          <!-- ═══════════════════ 1. INTRODUCTION ═══════════════════ -->
 
           <h2 id="introduction">
             Introduction
@@ -1209,8 +1143,6 @@
             </p>
           </div>
 
-          <!-- ═══════════════════ 2. WHY OPENAI ON BEDROCK ═══════════════════ -->
-
           <h2 id="why-bedrock">
             Why OpenAI on Bedrock matters for the enterprise
             <a class="heading-anchor" href="#why-bedrock" aria-label="Link to section">#</a>
@@ -1283,7 +1215,7 @@
             the published sweeps in this post do not yet include it, and nothing in this
             post turns on it. Since our comparison is about provider paths for models of comparable weights,
             and not whatever lab holds the leaderboard for best model, we decided not to include it here.
-            
+
           </p>
 
           <figure class="figure-wide">
@@ -1301,8 +1233,6 @@
             analysis, reporting, workflow automation, and other knowledge work, exactly the
             kind of operational surface where AWS governance and procurement matter.
           </p>
-
-          <!-- ═══════════════════ 2B. LATENCY BENCHMARK ═══════════════════ -->
 
           <h2 id="latency-benchmark">
             Benchmarking GPT-5.5 on Bedrock against the OpenAI API
@@ -1521,8 +1451,6 @@
             </p>
           </div>
 
-          <!-- ═══════════════════ 3. ARCHITECTURE ═══════════════════ -->
-
           <h2 id="template">
             Production service pattern
             <a class="heading-anchor" href="#template" aria-label="Link to section">#</a>
@@ -1691,8 +1619,6 @@
             service boundary can remain recognizable.
           </p>
 
-          <!-- ═══════════════════ 4. FSI ═══════════════════ -->
-
           <h2 id="fsi">
             Financial services: the FSI Evidence Copilot
             <a class="heading-anchor" href="#fsi" aria-label="Link to section">#</a>
@@ -1834,8 +1760,6 @@
             <figcaption>The FSI Evidence Copilot launch walkthrough: case brief → checklist → cash-flow chart → draft packet, with the decision boundary held throughout.</figcaption>
           </figure>
 
-          <!-- ═══════════════════ 5. CLINICAL ═══════════════════ -->
-
           <h2 id="clinical">
             Healthcare: the Clinical Evidence Copilot
             <a class="heading-anchor" href="#clinical" aria-label="Link to section">#</a>
@@ -1952,8 +1876,6 @@
             <figcaption>Criteria status by review. The useful signal includes what is supported, stale, ambiguous, or missing before the clinician opens the chart.</figcaption>
           </figure>
 
-          <!-- ═══════════════════ 6. PATTERN ═══════════════════ -->
-
           <h2 id="pattern">
             The shared pattern: evidence over decisions
             <a class="heading-anchor" href="#pattern" aria-label="Link to section">#</a>
@@ -1983,8 +1905,6 @@
               can't defend.
             </p>
           </div>
-
-          <!-- ═══════════════════ 7. PRODUCTION ═══════════════════ -->
 
           <h2 id="production">
             From migration to production
@@ -2024,8 +1944,6 @@
             the one slot in it that was always meant to be swappable.
           </p>
 
-          <!-- ═══════════════════ 8. CONCLUSION ═══════════════════ -->
-
           <h2 id="conclusion">
             Conclusion
             <a class="heading-anchor" href="#conclusion" aria-label="Link to section">#</a>
@@ -2053,8 +1971,6 @@
               Want to build with OpenAI on Amazon Bedrock? <a href="https://www.loka.com">Let's connect.</a>
             </p>
           </div>
-
-          <!-- ═══════════════════ FURTHER READING ═══════════════════ -->
 
           <h2 id="references">
             Further reading
@@ -2130,6 +2046,15 @@
               <a href="https://openai.com/index/codex-for-every-role-tool-workflow/">openai.com</a>
             </li>
           </ol>
+
+          <h3>Cite this post</h3>
+          <div class="citation-block"><pre><code>@misc{loka2026frontiermodels,
+  title        = {How Loka Evaluates and Builds with Frontier Models on AWS},
+  author       = {Kalinovski, Petar and Jakimovski, Bojan},
+  year         = {2026},
+  month        = {jun},
+  howpublished = {https://lokahq.github.io/gpt-bedrock-openai-benchmark/blog/}
+}</code></pre></div>
         </article>
 
         <nav class="paginator" aria-label="Post navigation">
@@ -2150,9 +2075,7 @@
 
     <button class="back-to-top" id="back-to-top" aria-label="Back to top">&#8593;</button>
 
-    <!-- ═══════════════════ JAVASCRIPT ═══════════════════ -->
     <script>
-      /* ── UI: reading progress, back-to-top, TOC highlight ── */
       (function () {
         var progress = document.getElementById("reading-progress");
         function updateProgress() {
@@ -2168,8 +2091,6 @@
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
 
-        /* Theme toggle: flip data-theme, persist, reflect aria-pressed. Default light;
-           the <head> script applies a stored dark preference before paint. Icon swap is CSS. */
         var themeBtn = document.getElementById("theme-toggle");
         function syncTheme() {
           themeBtn.setAttribute("aria-pressed", document.documentElement.getAttribute("data-theme") === "dark" ? "true" : "false");
@@ -2227,17 +2148,15 @@
         updateToc();
       })();
 
-      /* ── Charts ── */
       (function () {
         if (typeof Chart === "undefined") return;
 
-        /* Loka brand chart palette (official HEX) — blue first, then accents */
         var C = {
-          blue: "#1877f2",   /* Loka primary — use before any other color */
-          teal: "#0c6f71",   /* Loka green — primary accent */
-          yellow: "#f7d043", /* Loka yellow — secondary accent */
-          black: "#050517",  /* Loka black */
-          red: "#ef4444",    /* not a brand color — failure states only */
+          blue: "#1877f2",
+          teal: "#0c6f71",
+          yellow: "#f7d043",
+          black: "#050517",
+          red: "#ef4444",
         };
         var FONT = {
           family:
@@ -2303,7 +2222,6 @@
           },
         };
 
-        /* ── DeepSWE: GPT-5.5 vs Opus 4.8 token efficiency ── */
         var deepsweEl = document.getElementById("chart-deepswe-efficiency");
         if (deepsweEl) {
           new Chart(deepsweEl, {
@@ -2394,7 +2312,6 @@
           });
         }
 
-        /* ── Clinical: criteria status by review (stacked horizontal bar) ── */
         var clinicalEl = document.getElementById("chart-clinical");
         if (clinicalEl) {
           new Chart(clinicalEl, {
@@ -2417,7 +2334,6 @@
           });
         }
 
-        /* ── FSI: Atlas DSCR vs policy threshold ── */
         var dscrEl = document.getElementById("chart-dscr");
         if (dscrEl) {
           new Chart(dscrEl, {
@@ -2451,7 +2367,6 @@
           });
         }
 
-        /* ── FSI: wire-count spike (Atlas vs Northstar) ── */
         var wiresEl = document.getElementById("chart-wires");
         if (wiresEl) {
           new Chart(wiresEl, {
@@ -2485,7 +2400,6 @@
           });
         }
 
-        /* ── Benchmark: shared config ── */
         var EFFORTS = ["medium", "high", "xhigh"];
         function benchBarOpts(yLabel, ySuffix) {
           var opts = baseOpts(yLabel, "Reasoning effort");
@@ -2497,7 +2411,6 @@
           return opts;
         }
 
-        /* ── Benchmark: TTFB p50 by effort ── */
         var ttfbEl = document.getElementById("chart-bench-ttfb");
         if (ttfbEl) {
           new Chart(ttfbEl, {
@@ -2513,7 +2426,6 @@
           });
         }
 
-        /* ── Benchmark: end-to-end latency p50 / p90 by effort ── */
         var e2eEl = document.getElementById("chart-bench-e2e");
         if (e2eEl) {
           new Chart(e2eEl, {
@@ -2531,7 +2443,6 @@
           });
         }
 
-        /* ── Benchmark: mean output throughput by effort ── */
         var tpsEl = document.getElementById("chart-bench-tps");
         if (tpsEl) {
           new Chart(tpsEl, {
@@ -2547,7 +2458,6 @@
           });
         }
 
-        /* ── Benchmark: quadrant of our six runs (latency vs throughput) ── */
         var benchQuadrantPlugin = {
           id: "benchQuadrantPlugin",
           afterDraw: function (chart) {
