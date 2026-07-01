@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        try { if (localStorage.getItem("loka-theme") === "dark") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+      })();
+    </script>
     <meta
       name="description"
       content="OpenAI GPT-5.5, GPT-5.4, and Codex are generally available on Amazon Bedrock. Loka, one of five global OpenAI launch partners, benchmarked GPT-5.5 on Bedrock against the OpenAI API for accuracy, latency, and reliability, then built two regulated-industry copilots for healthcare and financial services on the path that passed."
@@ -20,914 +25,993 @@
     <meta name="twitter:image" content="assets/cover-banner-gpt.png" />
     <title>How Loka Evaluates and Builds with Frontier Models on AWS</title>
     <link rel="icon" type="image/svg+xml" href="https://cdn.prod.website-files.com/6490383845d4c0f51f929ca8/649052c9d3731fb704eea658_favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
-      @font-face {
-        font-family: "Iowan Old Style BT";
-        src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_regular.woff2")
-          format("woff2");
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-      }
+    :root {
+      --bg: #fcfcfd;
+      --bg-soft: #f4f5f7;
+      --bg-code: #f2f3f6;
+      --fg: #16181f;
+      --fg-2: #33353e;
+      --fg-3: #61636d;
+      --fg-4: #9799a3;
+      --line: #e5e5e5;
+      --line-strong: #cfd0d7;
+      --accent: #1877f2;
+      --link: #1877f2;
+      --max-content: 680px;
+      --max-wide: 900px;
+      --max-cover: 960px;
+      --toc-width: 200px;
+      --toc-gap: 40px;
+      --font-sans: "Alliance No.2", "Archivo", -apple-system, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", Consolas, monospace;
+      --c-blue: #1877f2;
+      --c-teal: #0c6f71;
+      --c-yellow: #f7d043;
+      --c-black: #050517;
+      --c-grey: #e5e5e5;
+      --c-red: #ef4444;
+      --c-purple: #8b5cf6;
+      --c-gray: #6b7280;
+    }
 
-      @font-face {
-        font-family: "Iowan Old Style BT";
-        src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_italic.woff2")
-          format("woff2");
-        font-style: italic;
-        font-weight: 400;
-        font-display: swap;
-      }
+    :root[data-theme="dark"] {
+      --bg: #14161c;
+      --bg-soft: #1d2029;
+      --bg-code: #1a1c24;
+      --fg: #e9eaf1;
+      --fg-2: #c3c6d1;
+      --fg-3: #969aa8;
+      --fg-4: #6c6f7c;
+      --line: #2b2e38;
+      --line-strong: #3b3e4a;
+      --accent: #4f93f7;
+      --link: #5b9dff;
+    }
 
-      @font-face {
-        font-family: "Iowan Old Style BT";
-        src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_bold.woff2")
-          format("woff2");
-        font-style: normal;
-        font-weight: 600;
-        font-display: swap;
-      }
+    [data-theme="dark"] .status-pill.ok     { color: #86efac; background: #0f2017; border-color: #1f5135; }
+    [data-theme="dark"] .status-pill.review { color: #fcd34d; background: #241a07; border-color: #5a4310; }
+    [data-theme="dark"] .status-pill.gap    { color: #fca5a5; background: #2a1314; border-color: #5e2526; }
 
-      @font-face {
-        font-family: "GT America";
-        src: url("https://thinkingmachines.ai/fonts/gt-america/GT-America-Standard-Regular.woff2")
-          format("woff2");
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-      }
+    [data-theme="dark"] .output-box-header.good { color: #86efac; background: #0f2017; border-bottom-color: #1f5135; }
+    [data-theme="dark"] .output-box-header.bad  { color: #fca5a5; background: #2a1314; border-bottom-color: #5e2526; }
+    [data-theme="dark"] .output-box-header.info { color: #93c5fd; background: #11203a; border-bottom-color: #1e3a64; }
 
-      @font-face {
-        font-family: "GT America";
-        src: url("https://thinkingmachines.ai/fonts/gt-america/GT-America-Standard-Medium.woff2")
-          format("woff2");
-        font-style: normal;
-        font-weight: 500;
-        font-display: swap;
-      }
+    [data-theme="dark"] .frame      { fill: #1d2029; stroke: #3b3e4a; }
+    [data-theme="dark"] .shared     { fill: #15171d; stroke: #3b3e4a; }
+    [data-theme="dark"] .accent-box { fill: #12223d; stroke: #4f93f7; }
+    [data-theme="dark"] .alt-box    { fill: #0c241f; stroke: #2aa3a5; }
+    [data-theme="dark"] .dark       { fill: #050517; stroke: #3b3e4a; }
+    [data-theme="dark"] .line       { stroke: #6c6f7c; }
+    [data-theme="dark"] svg text    { fill: var(--fg); }
 
-      :root {
-        --bg: #fff;
-        --bg-soft: #f7f7f7;
-        --bg-code: #f4f4f3;
-        --fg: #1a1a1a;
-        --fg-2: #333;
-        --fg-3: #666;
-        --fg-4: #999;
-        --line: #e5e5e5;
-        --line-strong: #d0d0d0;
-        --accent: #1877f2;
-        --link: #1877f2;
-        --max-content: 680px;
-        --max-wide: 900px;
-        --max-cover: 960px;
-        --toc-width: 200px;
-        --toc-gap: 40px;
-        --font-serif: "Iowan Old Style BT", Georgia, "Times New Roman", serif;
-        --font-sans: "GT America", -apple-system, "Segoe UI", "Helvetica Neue",
-          Helvetica, sans-serif;
-        --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono",
-          Consolas, monospace;
-        --c-blue: #1877f2;
-        --c-red: #ef4444;
-        --c-green: #22c55e;
-        --c-amber: #f59e0b;
-        --c-purple: #8b5cf6;
-        --c-teal: #14b8a6;
-        --c-gray: #6b7280;
-      }
+    [data-theme="dark"] .chart-frame { background: #fcfcfd; border-color: #cfd0d7; }
 
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-      }
+    [data-theme="dark"] .loka-logo { color: #fff; }
 
-      html {
-        scroll-behavior: smooth;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
+    [data-theme="dark"] .resource-links .brand { filter: brightness(0) invert(1); }
 
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--fg);
-        font-family: var(--font-serif);
-        font-size: 17px;
-        line-height: 1.7;
-      }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-      a {
-        color: var(--link);
-      }
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-      /* ── Reading progress ── */
-      .reading-progress {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 0%;
-        height: 2px;
-        background: var(--accent);
-        z-index: 1000;
-        transition: width 0.1s linear;
-      }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      font-size: 17px;
+      line-height: 1.7;
+    }
 
-      /* ── Layout ── */
-      .shell {
-        min-height: 100vh;
-      }
+    a {
+      color: var(--link);
+    }
 
-      #main.post {
-        max-width: var(--max-cover);
-        margin: 0 auto;
-        padding: 0 1.6rem 4rem;
-        position: relative;
-      }
+    .reading-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: var(--accent);
+      z-index: 1000;
+      transition: width 0.1s linear;
+    }
 
-      /* ── Header ── */
-      .post-heading {
-        text-align: center;
-        max-width: var(--max-content);
-        margin: 3.5rem auto 0;
-      }
+    .shell {
+      min-height: 100vh;
+    }
 
-      .post-eyebrow {
-        display: inline-block;
-        margin: 0 0 1rem;
-        font-family: var(--font-sans);
-        font-size: 0.72rem;
-        font-weight: 500;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--accent);
-        border: 1px solid var(--line-strong);
-        border-radius: 999px;
-        padding: 0.3rem 0.8rem;
-      }
+    #main.post {
+      max-width: var(--max-wide);
+      margin: 0 auto;
+      padding: 0 1.6rem 4rem;
+      position: relative;
+    }
 
-      .post-title {
-        margin: 0;
-        font-size: 2.4rem;
-        line-height: 1.2;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-      }
+    .post-heading {
+      text-align: center;
+      max-width: var(--max-content);
+      margin: 3.5rem auto 0;
+    }
 
-      .post-title-main {
-        display: block;
-      }
+    .post-title {
+      margin: 0;
+      font-size: 2.4rem;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
 
-      .post-title-sub {
-        display: block;
-        margin-top: 0.35rem;
-        font-size: 0.92em;
-        font-weight: 600;
-        color: var(--fg-2);
-      }
+    .post-title-main {
+      display: block;
+    }
 
-      .authors {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem 2rem;
-        margin: 1.6rem auto 0;
-        max-width: 420px;
-        text-align: center;
-        font-family: var(--font-sans);
-      }
+    .post-title-sub {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.92em;
+      font-weight: 600;
+      color: var(--fg-2);
+    }
 
-      .author-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.1rem;
-      }
+    .authors {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem 2rem;
+      margin: 1.6rem auto 0;
+      max-width: 420px;
+      text-align: center;
+      font-family: var(--font-sans);
+    }
 
-      .author-name {
-        font-size: 1rem;
-        font-weight: 500;
-        color: var(--fg);
-      }
+    .author-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.1rem;
+    }
 
-      .author-name a {
-        color: var(--fg);
-        text-decoration: none;
-        border-bottom: 1px solid var(--line);
-      }
+    .author-name {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--fg);
+    }
 
-      .author-name a:hover {
-        border-bottom-color: var(--fg);
-      }
+    .author-name a {
+      color: var(--fg);
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+    }
 
-      .author-email {
-        font-size: 0.82rem;
-        color: var(--fg-3);
-      }
+    .author-name a:hover {
+      border-bottom-color: var(--fg);
+    }
 
-      .author-email a {
-        color: var(--fg-3);
-        text-decoration: none;
-      }
+    .author-role {
+      font-size: 0.82rem;
+      color: var(--fg-2);
+    }
 
-      .author-email a:hover {
-        color: var(--accent);
-      }
+    .author-email {
+      font-size: 0.82rem;
+      color: var(--fg-3);
+    }
 
-      .author-affiliation {
-        margin: 1rem 0 0;
-        text-align: center;
-      }
+    .author-email a {
+      color: var(--fg-3);
+      text-decoration: none;
+    }
 
-      .author-affiliation .loka-logo {
-        height: 2rem;
-        vertical-align: middle;
-      }
+    .author-email a:hover {
+      color: var(--accent);
+    }
 
-      .post-date {
-        margin: 0.8rem 0 0;
-        font-family: var(--font-sans);
-        font-size: 0.88rem;
-        color: var(--fg-4);
-      }
+    .author-affiliation {
+      margin: 1rem 0 0;
+      text-align: center;
+    }
 
-      .resource-links {
-        margin: 1rem 0 0;
-        padding: 0;
-        list-style: none;
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        font-family: var(--font-sans);
-        font-size: 0.88rem;
-      }
+    .author-affiliation .loka-logo {
+      height: 2rem;
+      vertical-align: middle;
+    }
 
-      .resource-links a {
-        color: var(--fg-3);
-        text-decoration: none;
-        border-bottom: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-      }
+    .post-date {
+      margin: 0.8rem 0 0;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      color: var(--fg-4);
+    }
 
-      .resource-links a:hover {
-        color: var(--fg);
-      }
+    .resource-links {
+      margin: 1rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+    }
 
-      .resource-links {
-        align-items: center;
-        gap: 1.9rem;
-      }
+    .resource-links a {
+      color: var(--fg-3);
+      text-decoration: none;
+      border-bottom: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
 
-      .resource-links .brand {
-        display: block;
-        width: auto;
-        opacity: 0.82;
-        transition: opacity 0.15s ease;
-      }
+    .resource-links a:hover {
+      color: var(--fg);
+    }
 
-      .resource-links a:hover .brand {
-        opacity: 1;
-      }
+    .resource-links .icon {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+    }
 
-      .brand-openai {
-        height: 1.05rem;
-      }
+    .resource-links .brand {
+      display: block;
+      width: auto;
+      opacity: 0.82;
+      transition: opacity 0.15s ease;
+    }
 
-      .brand-aws {
-        height: 1.5rem;
-      }
+    .resource-links a:hover .brand {
+      opacity: 1;
+    }
 
-      .brand-loka {
-        height: 1rem;
-      }
+    .brand-openai {
+      height: 1.05rem;
+    }
 
-      /* ── Cover ── */
-      .post-cover {
-        max-width: var(--max-cover);
-        margin: 2.2rem auto 2.5rem;
-      }
+    .brand-aws {
+      height: 1.25rem;
+      transform: translateY(2px);
+    }
 
-      .post-cover img {
-        width: 100%;
-        height: auto;
-        display: block;
-        border-radius: 18px;
-        border: 1px solid var(--line);
-      }
+    .brand-loka {
+      height: 1rem;
+    }
 
-      /* ── Article ── */
-      article.content {
-        max-width: var(--max-content);
-        margin: 0 auto;
-        position: relative;
-      }
+    .post-cover {
+      max-width: var(--max-cover);
+      margin: 2.2rem auto 2.5rem;
+    }
 
-      /* ── Callout ── */
-      .callout {
-        border-left: 3px solid var(--accent);
-        padding: 0.8rem 1.1rem;
-        margin-bottom: 1.3rem;
-        background: var(--bg-soft);
-      }
+    .post-cover img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+    }
 
-      .callout strong {
-        font-family: var(--font-sans);
-        font-weight: 500;
-      }
+    article.content {
+      max-width: var(--max-content);
+      margin: 0 auto;
+      position: relative;
+    }
 
-      .callout p:first-child {
-        margin-top: 0;
-      }
+    .callout {
+      border-left: 3px solid var(--accent);
+      padding: 0.8rem 1.1rem;
+      margin-bottom: 1.3rem;
+      background: var(--bg-soft);
+    }
 
-      .callout p:last-child,
-      .callout ul:last-child {
-        margin-bottom: 0;
-      }
+    .callout strong {
+      font-family: var(--font-sans);
+      font-weight: 500;
+    }
 
-      .callout ul {
-        margin-left: 1.2rem;
-      }
+    .callout p:first-child {
+      margin-top: 0;
+    }
 
-      .callout li {
-        margin-bottom: 0.3rem;
-      }
+    .callout p:last-child,
+    .callout ul:last-child {
+      margin-bottom: 0;
+    }
 
-      .callout.warn {
-        border-left-color: var(--c-amber);
-      }
+    .callout ul {
+      margin-left: 1.2rem;
+    }
 
-      /* ── Wide figures ── */
-      .figure-wide {
-        max-width: var(--max-wide);
-        margin-left: calc((var(--max-content) - var(--max-wide)) / 2);
-        margin-right: calc((var(--max-content) - var(--max-wide)) / 2);
-      }
+    .callout li {
+      margin-bottom: 0.3rem;
+    }
 
-      .figure-wide canvas {
-        width: 100% !important;
-        height: auto !important;
-      }
+    .callout.warn {
+      border-left-color: var(--c-yellow);
+    }
 
-      .chart-frame {
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 1rem 1.1rem 0.6rem;
-        background: var(--bg);
-      }
+    .equation {
+      margin: 0.9rem 0 1.1rem;
+      padding: 0.65rem 1rem;
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      text-align: center;
+    }
 
-      /* ── Video ── */
-      .video-figure video {
-        width: 100%;
-        height: auto;
-        display: block;
-        border-radius: 14px;
-        border: 1px solid var(--line);
-        background: #000;
-      }
+    .equation .equation-inner {
+      display: inline-block;
+      font-size: 1.05em;
+    }
 
-      /* ── Left TOC ── */
+    .figure-wide {
+      max-width: var(--max-wide);
+      margin-left: calc((var(--max-content) - var(--max-wide)) / 2);
+      margin-right: calc((var(--max-content) - var(--max-wide)) / 2);
+    }
+
+    .figure-wide canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .chart-frame {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.1rem 0.6rem;
+      background: var(--bg);
+    }
+
+    .video-figure video {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #000;
+    }
+
+    .left-toc {
+      position: sticky;
+      top: 2rem;
+      float: left;
+      margin-left: calc(-1 * var(--toc-width) - var(--toc-gap));
+      width: var(--toc-width);
+      font-size: 0.85rem;
+      line-height: 1.45;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+    }
+
+    .toc-title {
+      margin: 0 0 0.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-4);
+      font-weight: 500;
+    }
+
+    .toc-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-left: 1px solid var(--line);
+    }
+
+    .toc-list li {
+      margin: 0;
+    }
+
+    .toc-list a {
+      display: block;
+      padding: 0.2rem 0 0.2rem 0.85rem;
+      text-decoration: none;
+      color: var(--fg-4);
+      border-left: 2px solid transparent;
+      margin-left: -1px;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .toc-list a:hover {
+      color: var(--fg-2);
+    }
+
+    .toc-list a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      font-weight: 500;
+    }
+
+    .content p,
+    .content ul,
+    .content ol,
+    .content pre,
+    .content blockquote,
+    .content table,
+    .content figure {
+      margin: 0 0 1.3rem;
+    }
+
+    .content h2,
+    .content h3,
+    .content h4,
+    .content h5,
+    .content h6 {
+      line-height: 1.3;
+      position: relative;
+    }
+
+    .content h2 {
+      margin: 2.8rem 0 0.9rem;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .content h3 {
+      margin: 2rem 0 0.7rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .content h4 {
+      margin: 1.6rem 0 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--fg-2);
+    }
+
+    .content h5 {
+      margin: 1.4rem 0 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-3);
+    }
+
+    .content h6 {
+      margin: 1.2rem 0 0.3rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-4);
+    }
+
+    .heading-anchor {
+      position: absolute;
+      left: -1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      text-decoration: none;
+      color: var(--fg-4);
+      font-weight: 400;
+      font-size: 0.85em;
+      transition: opacity 0.15s ease;
+    }
+
+    .content h2:hover .heading-anchor,
+    .content h3:hover .heading-anchor,
+    .content h4:hover .heading-anchor,
+    .content h5:hover .heading-anchor,
+    .content h6:hover .heading-anchor,
+    .heading-anchor:focus {
+      opacity: 1;
+    }
+
+    .content ul {
+      margin-left: 1.5rem;
+      padding: 0;
+      list-style: disc;
+    }
+
+    .content ol {
+      margin-left: 1.7rem;
+    }
+
+    .content li {
+      margin-bottom: 0.25rem;
+    }
+
+    .content a {
+      text-decoration-color: var(--line-strong);
+      text-underline-offset: 2px;
+      transition: text-decoration-color 0.15s ease;
+    }
+
+    .content a:hover {
+      text-decoration-color: var(--fg);
+    }
+
+    .content blockquote {
+      margin-left: 0;
+      padding: 0.5rem 1.1rem;
+      border-left: 3px solid var(--line-strong);
+      color: var(--fg-2);
+    }
+
+    .content code {
+      font-family: var(--font-mono);
+      font-size: 0.84em;
+      background: var(--bg-code);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+    }
+
+    .content pre {
+      background: var(--bg-code);
+      border-radius: 4px;
+      overflow-x: auto;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--line);
+    }
+
+    .content pre code {
+      padding: 0;
+      background: none;
+      display: block;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      border-radius: 0;
+    }
+
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .content th,
+    .content td {
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .content th {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      font-size: 0.82rem;
+      color: var(--fg-3);
+      border-bottom: 2px solid var(--line-strong);
+    }
+
+    .content tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .content td code {
+      font-size: 0.8rem;
+    }
+
+    .status-pill {
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.08rem 0.45rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .status-pill.ok {
+      color: #166534;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-pill.review {
+      color: #92400e;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    .status-pill.gap {
+      color: #991b1b;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+
+    .content figure {
+      margin-top: 1.6rem;
+    }
+
+    .content figure img,
+    .content figure svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .content figcaption {
+      margin-top: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--fg-3);
+      font-style: italic;
+      text-align: center;
+    }
+
+    .citation-block {
+      margin-top: 0.5rem;
+    }
+
+    .citation-block pre {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.8rem 1rem;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+
+    .citation-block pre code {
+      font-family: var(--font-mono);
+      background: none;
+      padding: 0;
+      color: var(--fg-2);
+    }
+
+    .references-list {
+      margin-left: 1.4rem;
+      padding: 0;
+      list-style: decimal;
+    }
+
+    .references-list li {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--fg-2);
+    }
+
+    .references-list li a {
+      display: inline-block;
+      margin-top: 0.1rem;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      color: var(--fg-3);
+    }
+
+    .paginator {
+      max-width: var(--max-content);
+      margin: 2.5rem auto 0;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+    }
+
+    .paginator a {
+      text-decoration: none;
+      color: var(--fg-3);
+      transition: color 0.15s ease;
+    }
+
+    .paginator a:hover {
+      color: var(--fg);
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--fg-3);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease, color 0.15s ease, border-color 0.15s ease;
+      z-index: 100;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--fg-3);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease, border-color 0.15s ease;
+      z-index: 200;
+    }
+
+    .theme-toggle:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .theme-toggle .icon-sun {
+      display: none;
+    }
+
+    [data-theme="dark"] .theme-toggle .icon-moon {
+      display: none;
+    }
+
+    [data-theme="dark"] .theme-toggle .icon-sun {
+      display: block;
+    }
+
+    .loka-logo {
+      display: inline-block;
+      height: 1.15em;
+      width: auto;
+      vertical-align: -0.15em;
+      margin-right: 0.15em;
+      color: var(--c-blue);
+    }
+
+    .site-footer .loka-logo {
+      height: 1em;
+      vertical-align: -0.1em;
+    }
+
+    .site-footer {
+      max-width: var(--max-content);
+      margin: 0 auto;
+      padding: 1.5rem 1.6rem 2rem;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      color: var(--fg-4);
+      text-align: center;
+    }
+
+    .site-footer a {
+      color: var(--fg-3);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: var(--fg);
+    }
+
+    .output-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.3rem 0;
+    }
+
+    .output-box {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .output-box-header {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg-soft);
+    }
+
+    .output-box-header.good {
+      color: #166534;
+      background: #f0fdf4;
+      border-bottom-color: #bbf7d0;
+    }
+
+    .output-box-header.bad {
+      color: #991b1b;
+      background: #fef2f2;
+      border-bottom-color: #fecaca;
+    }
+
+    .output-box-header.info {
+      color: #1e40af;
+      background: #eff6ff;
+      border-bottom-color: #bfdbfe;
+    }
+
+    .output-box-body {
+      padding: 0.8rem;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .output-box-body code {
+      font-size: 0.78rem;
+    }
+
+    .frame {
+      fill: #fff;
+      stroke: #d0d0d0;
+      stroke-width: 1.5;
+    }
+
+    .shared {
+      fill: #f7f7f7;
+      stroke: #d0d0d0;
+      stroke-width: 1.5;
+    }
+
+    .accent-box {
+      fill: #eff6ff;
+      stroke: #1877f2;
+      stroke-width: 1.5;
+    }
+
+    .alt-box {
+      fill: #f0fdf4;
+      stroke: #0c6f71;
+      stroke-width: 1.5;
+    }
+
+    .dark {
+      fill: #050517;
+      stroke: #050517;
+    }
+
+    .line {
+      stroke: #999;
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .label {
+      font-weight: 500;
+    }
+
+    @media (max-width: 1100px) {
       .left-toc {
-        position: sticky;
-        top: 2rem;
-        float: left;
-        margin-left: calc(-1 * var(--toc-width) - var(--toc-gap));
-        width: var(--toc-width);
-        font-size: 0.85rem;
-        line-height: 1.45;
-        max-height: calc(100vh - 4rem);
-        overflow-y: auto;
-      }
-
-      .toc-title {
-        margin: 0 0 0.5rem;
-        font-family: var(--font-sans);
-        font-size: 0.7rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--fg-4);
-        font-weight: 500;
-      }
-
-      .toc-list {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        border-left: 1px solid var(--line);
-      }
-
-      .toc-list li {
-        margin: 0;
-      }
-
-      .toc-list a {
-        display: block;
-        padding: 0.2rem 0 0.2rem 0.85rem;
-        text-decoration: none;
-        color: var(--fg-4);
-        border-left: 2px solid transparent;
-        margin-left: -1px;
-        transition: color 0.15s ease, border-color 0.15s ease;
-      }
-
-      .toc-list a:hover {
-        color: var(--fg-2);
-      }
-
-      .toc-list a.active {
-        color: var(--accent);
-        border-left-color: var(--accent);
-        font-weight: 500;
-      }
-
-      /* ── Content typography ── */
-      .content p,
-      .content ul,
-      .content ol,
-      .content pre,
-      .content blockquote,
-      .content table,
-      .content figure {
-        margin: 0 0 1.3rem;
-      }
-
-      .content h2,
-      .content h3,
-      .content h4 {
-        line-height: 1.3;
-        position: relative;
-      }
-
-      .content h2 {
-        margin: 2.8rem 0 0.9rem;
-        font-size: 1.5rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-      }
-
-      .content h3 {
-        margin: 2rem 0 0.7rem;
-        font-size: 1.15rem;
-        font-style: italic;
-        font-weight: 400;
-        color: var(--fg-2);
-      }
-
-      .content h4 {
-        margin: 1.6rem 0 0.5rem;
-        font-size: 1.05rem;
-        font-style: italic;
-        font-weight: 400;
-        color: var(--fg-2);
+        display: none;
       }
 
       .heading-anchor {
-        position: absolute;
-        left: -1.2rem;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: 0;
-        text-decoration: none;
-        color: var(--fg-4);
-        font-weight: 400;
-        font-size: 0.85em;
-        transition: opacity 0.15s ease;
+        display: none;
       }
 
-      .content h2:hover .heading-anchor,
-      .content h3:hover .heading-anchor,
-      .content h4:hover .heading-anchor,
-      .heading-anchor:focus {
-        opacity: 1;
-      }
-
-      .content ul {
-        margin-left: 1.5rem;
-        padding: 0;
-        list-style: disc;
-      }
-
-      .content ol {
-        margin-left: 1.7rem;
-      }
-
-      .content li {
-        margin-bottom: 0.25rem;
-      }
-
-      .content a {
-        text-decoration-color: var(--line-strong);
-        text-underline-offset: 2px;
-        transition: text-decoration-color 0.15s ease;
-      }
-
-      .content a:hover {
-        text-decoration-color: var(--fg);
-      }
-
-      .content blockquote {
+      .figure-wide {
+        max-width: var(--max-content);
         margin-left: 0;
-        padding: 0.5rem 1.1rem;
-        border-left: 3px solid var(--line-strong);
-        color: var(--fg-2);
+        margin-right: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        font-size: 16px;
       }
 
-      .content code {
-        font-family: var(--font-mono);
-        font-size: 0.84em;
-        background: var(--bg-code);
-        padding: 0.1rem 0.3rem;
-        border-radius: 3px;
+      #main.post {
+        padding: 0 1.1rem 3rem;
       }
 
-      .content pre {
-        background: var(--bg-code);
-        border-radius: 4px;
-        overflow-x: auto;
-        padding: 0.9rem 1rem;
-        border: 1px solid var(--line);
+      .post-title {
+        font-size: 1.7rem;
       }
 
-      .content pre code {
-        padding: 0;
-        background: none;
-        display: block;
-        font-size: 0.8rem;
-        line-height: 1.5;
-        border-radius: 0;
+      .resource-links {
+        gap: 1rem;
+        font-size: 0.82rem;
       }
 
-      /* ── Tables ── */
+      .content h2 {
+        font-size: 1.3rem;
+      }
+
+      .callout {
+        padding: 0.7rem 0.9rem;
+      }
+
       .content table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
       }
 
       .content th,
       .content td {
-        padding: 0.5rem 0.65rem;
-        text-align: left;
-        vertical-align: top;
-        border-bottom: 1px solid var(--line);
+        padding: 0.4rem 0.45rem;
       }
 
-      .content th {
-        font-family: var(--font-sans);
-        font-weight: 500;
-        font-size: 0.82rem;
-        color: var(--fg-3);
-        border-bottom: 2px solid var(--line-strong);
-      }
-
-      .content tbody tr:last-child td {
-        border-bottom: none;
-      }
-
-      .content td code {
-        font-size: 0.8rem;
-      }
-
-      .status-pill {
-        font-family: var(--font-sans);
-        font-size: 0.72rem;
-        font-weight: 500;
-        padding: 0.08rem 0.45rem;
-        border-radius: 999px;
-        white-space: nowrap;
-      }
-
-      .status-pill.ok {
-        color: #166534;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-      }
-
-      .status-pill.review {
-        color: #92400e;
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-      }
-
-      .status-pill.gap {
-        color: #991b1b;
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-      }
-
-      /* ── Figures ── */
-      .content figure {
-        margin-top: 1.6rem;
-      }
-
-      .content figure img,
-      .content figure svg {
-        display: block;
-        width: 100%;
-        height: auto;
-      }
-
-      .content figcaption {
-        margin-top: 0.5rem;
-        font-size: 0.88rem;
-        color: var(--fg-3);
-        font-style: italic;
-        text-align: center;
-      }
-
-      /* ── Output comparison ── */
-      .output-comparison {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin: 1.3rem 0;
-      }
-
-      .output-box {
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        overflow: hidden;
-        margin-bottom: 1.3rem;
-      }
-
-      .output-box-header {
-        font-family: var(--font-sans);
-        font-size: 0.78rem;
-        font-weight: 500;
-        padding: 0.5rem 0.8rem;
-        border-bottom: 1px solid var(--line);
-        background: var(--bg-soft);
-      }
-
-      .output-box-header.good {
-        color: #166534;
-        background: #f0fdf4;
-        border-bottom-color: #bbf7d0;
-      }
-
-      .output-box-header.bad {
-        color: #991b1b;
-        background: #fef2f2;
-        border-bottom-color: #fecaca;
-      }
-
-      .output-box-header.info {
-        color: #1e40af;
-        background: #eff6ff;
-        border-bottom-color: #bfdbfe;
-      }
-
-      .output-box-body {
-        padding: 0.8rem;
-        font-size: 0.82rem;
-        line-height: 1.55;
-        max-height: 420px;
-        overflow-y: auto;
-      }
-
-      .output-box-body :first-child {
-        margin-top: 0;
-      }
-
-      .output-box-body :last-child {
-        margin-bottom: 0;
-      }
-
-      .output-box-body code {
-        font-size: 0.78rem;
-      }
-
-      .output-box-body table {
-        font-size: 0.8rem;
-      }
-
-      /* ── Citation ── */
-      .citation-block {
-        margin-top: 0.5rem;
-      }
-
-      .citation-block pre {
-        background: var(--bg-soft);
-        border: 1px solid var(--line);
-        border-radius: 4px;
-        padding: 0.8rem 1rem;
-        font-size: 0.78rem;
-        line-height: 1.5;
-        overflow-x: auto;
-      }
-
-      .citation-block pre code {
-        font-family: var(--font-mono);
-        background: none;
-        padding: 0;
-        color: var(--fg-2);
-      }
-
-      /* ── References ── */
-      .references-list {
-        margin-left: 1.4rem;
-        padding: 0;
-        list-style: decimal;
-      }
-
-      .references-list li {
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-        line-height: 1.65;
-        color: var(--fg-2);
-      }
-
-      .references-list li a {
-        display: inline-block;
-        margin-top: 0.1rem;
-        font-family: var(--font-sans);
-        font-size: 0.82rem;
-        color: var(--fg-3);
-      }
-
-      /* ── Paginator ── */
-      .paginator {
-        max-width: var(--max-content);
-        margin: 2.5rem auto 0;
-        padding-top: 1.2rem;
-        border-top: 1px solid var(--line);
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        font-family: var(--font-sans);
-        font-size: 0.88rem;
-      }
-
-      .paginator a {
-        text-decoration: none;
-        color: var(--fg-3);
-        transition: color 0.15s ease;
-      }
-
-      .paginator a:hover {
-        color: var(--fg);
-      }
-
-      /* ── Back to top ── */
       .back-to-top {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: var(--bg);
-        color: var(--fg-3);
-        border: 1px solid var(--line);
-        cursor: pointer;
-        display: flex;
+        bottom: 1.2rem;
+        right: 1.2rem;
+      }
+
+      .output-comparison {
+        grid-template-columns: 1fr;
+      }
+
+      .authors {
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transform: translateY(8px);
-        transition: opacity 0.25s ease, transform 0.25s ease,
-          color 0.15s ease, border-color 0.15s ease;
-        z-index: 100;
-        font-size: 16px;
-        line-height: 1;
+      }
+    }
+
+    @media print {
+
+      .reading-progress,
+      .left-toc,
+      .back-to-top,
+      .theme-toggle,
+      .paginator {
+        display: none !important;
       }
 
-      .back-to-top.visible {
-        opacity: 1;
-        transform: translateY(0);
+      body {
+        font-size: 11pt;
       }
 
-      .back-to-top:hover {
-        color: var(--accent);
-        border-color: var(--accent);
+      .figure-wide {
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
       }
 
-      /* ── Loka logo ── */
-      .loka-logo {
-        display: inline-block;
-        height: 1.15em;
-        width: auto;
-        vertical-align: -0.15em;
-        margin-right: 0.15em;
+      a {
+        color: inherit;
       }
-
-      .site-footer .loka-logo {
-        height: 1em;
-        vertical-align: -0.1em;
-      }
-
-      /* ── Footer ── */
-      .site-footer {
-        max-width: var(--max-content);
-        margin: 0 auto;
-        padding: 1.5rem 1.6rem 2rem;
-        font-family: var(--font-sans);
-        font-size: 0.82rem;
-        color: var(--fg-4);
-        text-align: center;
-        border-top: 1px solid var(--line);
-      }
-
-      .site-footer a {
-        color: var(--fg-3);
-        text-decoration: none;
-      }
-
-      .site-footer a:hover {
-        color: var(--fg);
-      }
-
-      /* ── Responsive ── */
-      @media (max-width: 1100px) {
-        .left-toc {
-          display: none;
-        }
-
-        .heading-anchor {
-          display: none;
-        }
-
-        .figure-wide {
-          max-width: var(--max-content);
-          margin-left: 0;
-          margin-right: 0;
-        }
-      }
-
-      @media (max-width: 768px) {
-        body {
-          font-size: 16px;
-        }
-
-        #main.post {
-          padding: 0 1.1rem 3rem;
-        }
-
-        .post-title {
-          font-size: 1.7rem;
-        }
-
-        .resource-links {
-          gap: 1rem;
-          font-size: 0.82rem;
-        }
-
-        .content h2 {
-          font-size: 1.3rem;
-        }
-
-        .callout {
-          padding: 0.7rem 0.9rem;
-        }
-
-        .content table {
-          font-size: 0.8rem;
-        }
-
-        .content th,
-        .content td {
-          padding: 0.4rem 0.45rem;
-        }
-
-        .back-to-top {
-          bottom: 1.2rem;
-          right: 1.2rem;
-        }
-
-        .output-comparison {
-          grid-template-columns: 1fr;
-        }
-
-      }
-
-      /* ── Print ── */
-      @media print {
-        .reading-progress,
-        .left-toc,
-        .back-to-top,
-        .paginator {
-          display: none !important;
-        }
-
-        body {
-          font-size: 11pt;
-        }
-
-        .figure-wide {
-          max-width: 100%;
-          margin-left: 0;
-          margin-right: 0;
-        }
-
-        a {
-          color: inherit;
-        }
-      }
-    </style>
+    }
+  </style>
   </head>
   <body>
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+    <symbol id="loka-wordmark" viewBox="0 0 93.054802 32.0476">
+<path d="M0 5.61719H4.37561V22.5767H13.4185V26.9628H0V5.61719Z" fill="currentColor"/>
+<path d="M51.9241 5.61719H56.5914V16.7286L68.0263 5.61719H73.8021L63.534 15.8221L63.2715 16.056L70.885 23.6878L88.9125 5.61719H93.0548V26.6704H88.6792V11.7577L74.0355 26.6704H67.968L60.7336 19.331L60.3836 19.0093L56.5914 22.7229V26.9628H51.9241V5.61719Z" fill="currentColor"/>
+<path d="M32.2342 0C23.3954 0 16.2486 7.16392 16.2486 16.0238C16.2486 24.8837 23.3954 32.0476 32.2342 32.0476C41.0729 32.0476 48.2197 24.8544 48.2197 16.0238C48.2197 7.16392 41.0729 0 32.2342 0ZM32.1175 27.6323C25.6999 27.6323 20.5367 22.4275 20.5367 16.0238C20.5367 9.59089 25.7291 4.41532 32.1175 4.41532C38.535 4.41532 43.6982 9.62013 43.6982 16.0238C43.6982 22.4275 38.5059 27.6323 32.1175 27.6323Z" fill="currentColor"/>
+<path d="M35.7338 16.0285C35.7338 17.9291 34.1878 19.4789 32.2917 19.4789C30.3956 19.4789 28.8495 17.9291 28.8495 16.0285C28.8495 14.1279 30.3956 12.5781 32.2917 12.5781C34.1878 12.5781 35.7338 14.1279 35.7338 16.0285Z" fill="currentColor"/>
+    </symbol>
+  </svg>
     <div class="reading-progress" id="reading-progress"></div>
     <a id="top"></a>
     <div class="shell">
@@ -940,21 +1024,24 @@
           <div class="authors">
             <div class="author-card">
               <span class="author-name"><a href="https://github.com/petarkalinovski">Petar Kalinovski</a></span>
+              <span class="author-role">Machine Learning Engineer</span>
               <span class="author-email"><a href="mailto:petar.kalinovski@loka.com">petar.kalinovski@loka.com</a></span>
             </div>
             <div class="author-card">
               <span class="author-name"><a href="https://github.com/Shekswess">Bojan Jakimovski</a></span>
+              <span class="author-role">Machine Learning Engineering Lead</span>
               <span class="author-email"><a href="mailto:bojan.jakimovski@loka.com">bojan.jakimovski@loka.com</a></span>
             </div>
           </div>
           <div class="author-affiliation">
-            <img src="https://cdn.worldvectorlogo.com/logos/loka-1.svg" alt="Loka" class="loka-logo" />
+            <a href="https://www.loka.com/" aria-label="Loka">
+              <svg class="loka-logo" viewBox="0 0 93.054802 32.0476" aria-hidden="true"><use href="#loka-wordmark" /></svg>
+            </a>
           </div>
-          <p class="post-date">June 2026</p>
+          <p class="post-date"><time datetime="2026-06">June 2026</time></p>
           <ul class="resource-links">
-            <li><a href="https://openai.com/index/openai-on-aws/" aria-label="OpenAI and AWS partnership announcement"><img class="brand brand-openai" src="assets/openai-logo.svg" alt="OpenAI" /></a></li>
-            <li><a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/" aria-label="Launch announcement on AWS"><img class="brand brand-aws" src="assets/aws-logo.svg" alt="Amazon Web Services" /></a></li>
-            <li><a href="https://www.loka.com/blog/loka-named-a-global-launch-partner-for-openai-models-on-amazon-bedrock" aria-label="Loka"><img class="brand brand-loka" src="assets/loka-logo.svg" alt="Loka" /></a></li>
+            <li><a href="https://openai.com/index/openai-on-aws/" aria-label="OpenAI and AWS partnership announcement"><svg class="brand brand-openai" viewBox="-4.126838974812941 0.900767442746961 939.436838974813 230.18142889845947" aria-hidden="true"><path d="M667.21 90.58c-13.76 0-23.58 4.7-28.4 13.6l-2.59 4.82V92.9h-22.39v97.86h23.55v-58.22c0-13.91 7.56-21.89 20.73-21.89 12.56 0 19.76 7.77 19.76 21.31v58.8h23.56v-63c0-23.3-12.79-37.18-34.22-37.18zm-114.21 0c-27.79 0-45 17.34-45 45.25v13.74c0 26.84 17.41 43.51 45.44 43.51 18.75 0 31.89-6.87 40.16-21l-14.6-8.4c-6.11 8.15-15.87 13.2-25.55 13.2-14.19 0-22.66-8.76-22.66-23.44v-3.89h65.73v-16.23c0-26-17.07-42.74-43.5-42.74zm22.09 43.15h-44.38v-2.35c0-16.11 7.91-25 22.27-25 13.83 0 22.09 8.76 22.09 23.44zm360.22-56.94V58.07h-81.46v18.72h28.56V172h-28.56v18.72h81.46V172h-28.57V76.79zM317.65 55.37c-36.38 0-59 22.67-59 59.18v19.74c0 36.5 22.61 59.18 59 59.18s59-22.68 59-59.18v-19.74c-.01-36.55-22.65-59.18-59-59.18zm34.66 80.27c0 24.24-12.63 38.14-34.66 38.14S283 159.88 283 135.64v-22.45c0-24.24 12.64-38.14 34.66-38.14s34.66 13.9 34.66 38.14zm98.31-45.06c-12.36 0-23.06 5.12-28.64 13.69l-2.53 3.9V92.9h-22.4v131.53h23.56v-47.64l2.52 3.74c5.3 7.86 15.65 12.55 27.69 12.55 20.31 0 40.8-13.27 40.8-42.93v-16.64c0-21.37-12.63-42.93-41-42.93zM468.06 149c0 15.77-9.2 25.57-24 25.57-13.8 0-23.43-10.36-23.43-25.18v-14.72c0-15 9.71-25.56 23.63-25.56 14.69 0 23.82 9.79 23.82 25.56zm298.47-90.92L719 190.76h23.93l9.1-28.44h54.64l.09.28 9 28.16h23.92L792.07 58.07zm-8.66 85.53l21.44-67.08 21.22 67.08zM212.59 95.12a57.27 57.27 0 0 0-4.92-47.05 58 58 0 0 0-62.4-27.79A57.29 57.29 0 0 0 102.06 1a57.94 57.94 0 0 0-55.27 40.14A57.31 57.31 0 0 0 8.5 68.93a58 58 0 0 0 7.13 67.94 57.31 57.31 0 0 0 4.92 47A58 58 0 0 0 83 211.72 57.31 57.31 0 0 0 126.16 231a57.94 57.94 0 0 0 55.27-40.14 57.3 57.3 0 0 0 38.28-27.79 57.92 57.92 0 0 0-7.12-67.95zM126.16 216a42.93 42.93 0 0 1-27.58-10c.34-.19 1-.52 1.38-.77l45.8-26.44a7.43 7.43 0 0 0 3.76-6.51V107.7l19.35 11.17a.67.67 0 0 1 .38.54v53.45A43.14 43.14 0 0 1 126.16 216zm-92.59-39.54a43 43 0 0 1-5.15-28.88c.34.21.94.57 1.36.81l45.81 26.45a7.44 7.44 0 0 0 7.52 0L139 142.52v22.34a.67.67 0 0 1-.27.6l-46.3 26.72a43.14 43.14 0 0 1-58.86-15.77zm-12-100A42.92 42.92 0 0 1 44 57.56V112a7.45 7.45 0 0 0 3.76 6.51l55.9 32.28L84.24 162a.68.68 0 0 1-.65.06L37.3 135.33a43.13 43.13 0 0 1-15.77-58.87zm159 37l-55.9-32.28L144 70a.69.69 0 0 1 .65-.06l46.29 26.73a43.1 43.1 0 0 1-6.66 77.76V120a7.44 7.44 0 0 0-3.74-6.54zm19.27-29c-.34-.21-.94-.57-1.36-.81L152.67 57.2a7.44 7.44 0 0 0-7.52 0l-55.9 32.27V67.14a.73.73 0 0 1 .28-.6l46.29-26.72a43.1 43.1 0 0 1 64 44.65zM78.7 124.3l-19.36-11.17a.73.73 0 0 1-.37-.54V59.14A43.09 43.09 0 0 1 129.64 26c-.34.19-.95.52-1.38.77l-45.8 26.44a7.45 7.45 0 0 0-3.76 6.51zm10.51-22.67l24.9-14.38L139 101.63v28.74l-24.9 14.38-24.9-14.38z"/></svg></a></li>
+            <li><a href="https://aws.amazon.com/blogs/machine-learning/openai-models-and-codex-on-amazon-bedrock-are-now-generally-available/" aria-label="Launch announcement on AWS"><svg class="brand brand-aws" viewBox="-.1 1.1 304.9 179.8" aria-hidden="true"><path d="m86.4 66.4c0 3.7.4 6.7 1.1 8.9.8 2.2 1.8 4.6 3.2 7.2.5.8.7 1.6.7 2.3 0 1-.6 2-1.9 3l-6.3 4.2c-.9.6-1.8.9-2.6.9-1 0-2-.5-3-1.4-1.4-1.5-2.6-3.1-3.6-4.7-1-1.7-2-3.6-3.1-5.9-7.8 9.2-17.6 13.8-29.4 13.8-8.4 0-15.1-2.4-20-7.2s-7.4-11.2-7.4-19.2c0-8.5 3-15.4 9.1-20.6s14.2-7.8 24.5-7.8c3.4 0 6.9.3 10.6.8s7.5 1.3 11.5 2.2v-7.3c0-7.6-1.6-12.9-4.7-16-3.2-3.1-8.6-4.6-16.3-4.6-3.5 0-7.1.4-10.8 1.3s-7.3 2-10.8 3.4c-1.6.7-2.8 1.1-3.5 1.3s-1.2.3-1.6.3c-1.4 0-2.1-1-2.1-3.1v-4.9c0-1.6.2-2.8.7-3.5s1.4-1.4 2.8-2.1c3.5-1.8 7.7-3.3 12.6-4.5 4.9-1.3 10.1-1.9 15.6-1.9 11.9 0 20.6 2.7 26.2 8.1 5.5 5.4 8.3 13.6 8.3 24.6v32.4zm-40.6 15.2c3.3 0 6.7-.6 10.3-1.8s6.8-3.4 9.5-6.4c1.6-1.9 2.8-4 3.4-6.4s1-5.3 1-8.7v-4.2c-2.9-.7-6-1.3-9.2-1.7s-6.3-.6-9.4-.6c-6.7 0-11.6 1.3-14.9 4s-4.9 6.5-4.9 11.5c0 4.7 1.2 8.2 3.7 10.6 2.4 2.5 5.9 3.7 10.5 3.7zm80.3 10.8c-1.8 0-3-.3-3.8-1-.8-.6-1.5-2-2.1-3.9l-23.5-77.3c-.6-2-.9-3.3-.9-4 0-1.6.8-2.5 2.4-2.5h9.8c1.9 0 3.2.3 3.9 1 .8.6 1.4 2 2 3.9l16.8 66.2 15.6-66.2c.5-2 1.1-3.3 1.9-3.9s2.2-1 4-1h8c1.9 0 3.2.3 4 1 .8.6 1.5 2 1.9 3.9l15.8 67 17.3-67c.6-2 1.3-3.3 2-3.9.8-.6 2.1-1 3.9-1h9.3c1.6 0 2.5.8 2.5 2.5 0 .5-.1 1-.2 1.6s-.3 1.4-.7 2.5l-24.1 77.3c-.6 2-1.3 3.3-2.1 3.9s-2.1 1-3.8 1h-8.6c-1.9 0-3.2-.3-4-1s-1.5-2-1.9-4l-15.5-64.5-15.4 64.4c-.5 2-1.1 3.3-1.9 4s-2.2 1-4 1zm128.5 2.7c-5.2 0-10.4-.6-15.4-1.8s-8.9-2.5-11.5-4c-1.6-.9-2.7-1.9-3.1-2.8s-.6-1.9-.6-2.8v-5.1c0-2.1.8-3.1 2.3-3.1.6 0 1.2.1 1.8.3s1.5.6 2.5 1c3.4 1.5 7.1 2.7 11 3.5 4 .8 7.9 1.2 11.9 1.2 6.3 0 11.2-1.1 14.6-3.3s5.2-5.4 5.2-9.5c0-2.8-.9-5.1-2.7-7s-5.2-3.6-10.1-5.2l-14.5-4.5c-7.3-2.3-12.7-5.7-16-10.2-3.3-4.4-5-9.3-5-14.5 0-4.2.9-7.9 2.7-11.1s4.2-6 7.2-8.2c3-2.3 6.4-4 10.4-5.2s8.2-1.7 12.6-1.7c2.2 0 4.5.1 6.7.4 2.3.3 4.4.7 6.5 1.1 2 .5 3.9 1 5.7 1.6s3.2 1.2 4.2 1.8c1.4.8 2.4 1.6 3 2.5.6.8.9 1.9.9 3.3v4.7c0 2.1-.8 3.2-2.3 3.2-.8 0-2.1-.4-3.8-1.2-5.7-2.6-12.1-3.9-19.2-3.9-5.7 0-10.2.9-13.3 2.8s-4.7 4.8-4.7 8.9c0 2.8 1 5.2 3 7.1s5.7 3.8 11 5.5l14.2 4.5c7.2 2.3 12.4 5.5 15.5 9.6s4.6 8.8 4.6 14c0 4.3-.9 8.2-2.6 11.6-1.8 3.4-4.2 6.4-7.3 8.8-3.1 2.5-6.8 4.3-11.1 5.6-4.5 1.4-9.2 2.1-14.3 2.1z" fill="#252f3e"/><g clip-rule="evenodd" fill="#f90" fill-rule="evenodd"><path d="m273.5 143.7c-32.9 24.3-80.7 37.2-121.8 37.2-57.6 0-109.5-21.3-148.7-56.7-3.1-2.8-.3-6.6 3.4-4.4 42.4 24.6 94.7 39.5 148.8 39.5 36.5 0 76.6-7.6 113.5-23.2 5.5-2.5 10.2 3.6 4.8 7.6z"/><path d="m287.2 128.1c-4.2-5.4-27.8-2.6-38.5-1.3-3.2.4-3.7-2.4-.8-4.5 18.8-13.2 49.7-9.4 53.3-5 3.6 4.5-1 35.4-18.6 50.2-2.7 2.3-5.3 1.1-4.1-1.9 4-9.9 12.9-32.2 8.7-37.5z"/></g></svg></a></li>
           </ul>
         </section>
 
@@ -975,10 +1062,9 @@
               <li><a href="#pattern">Evidence over decisions</a></li>
               <li><a href="#production">From migration to production</a></li>
               <li><a href="#conclusion">Conclusion</a></li>
+              <li><a href="#references">Further reading</a></li>
             </ul>
           </nav>
-
-          <!-- ═══════════════════ 1. INTRODUCTION ═══════════════════ -->
 
           <h2 id="introduction">
             Introduction
@@ -1057,8 +1143,6 @@
             </p>
           </div>
 
-          <!-- ═══════════════════ 2. WHY OPENAI ON BEDROCK ═══════════════════ -->
-
           <h2 id="why-bedrock">
             Why OpenAI on Bedrock matters for the enterprise
             <a class="heading-anchor" href="#why-bedrock" aria-label="Link to section">#</a>
@@ -1131,7 +1215,7 @@
             the published sweeps in this post do not yet include it, and nothing in this
             post turns on it. Since our comparison is about provider paths for models of comparable weights,
             and not whatever lab holds the leaderboard for best model, we decided not to include it here.
-            
+
           </p>
 
           <figure class="figure-wide">
@@ -1149,8 +1233,6 @@
             analysis, reporting, workflow automation, and other knowledge work, exactly the
             kind of operational surface where AWS governance and procurement matter.
           </p>
-
-          <!-- ═══════════════════ 2B. LATENCY BENCHMARK ═══════════════════ -->
 
           <h2 id="latency-benchmark">
             Benchmarking GPT-5.5 on Bedrock against the OpenAI API
@@ -1369,8 +1451,6 @@
             </p>
           </div>
 
-          <!-- ═══════════════════ 3. ARCHITECTURE ═══════════════════ -->
-
           <h2 id="template">
             Production service pattern
             <a class="heading-anchor" href="#template" aria-label="Link to section">#</a>
@@ -1436,14 +1516,10 @@
                     <path d="M0,0 L7,3 L0,6 Z" fill="#999" />
                   </marker>
                   <style>
-                    .frame { fill: #fff; stroke: #d0d0d0; stroke-width: 1.5; }
-                    .shared { fill: #f7f7f7; stroke: #d0d0d0; stroke-width: 1.5; }
-                    .fsi { fill: #eff6ff; stroke: #1877f2; stroke-width: 1.5; }
-                    .clinical { fill: #f0fdf4; stroke: #0c6f71; stroke-width: 1.5; }
-                    .warn { fill: #fffbeb; stroke: #f59e0b; stroke-width: 1.5; }
-                    .dark { fill: #050516; stroke: #050516; }
+                    .warn { fill: #fffbeb; stroke: #f7d043; stroke-width: 1.5; }
+                    [data-theme="dark"] .warn { fill: #241a07; stroke: #5a4310; }
                     .line { stroke: #999; stroke-width: 1.5; fill: none; marker-end: url(#agent-arrow); }
-                    text { font-family: 'GT America', -apple-system, 'Segoe UI', Helvetica, sans-serif; fill: #1a1a1a; font-size: 13px; }
+                    text { font-family: "Alliance No.2", "Archivo", -apple-system, "Segoe UI", "Helvetica Neue", Helvetica, sans-serif; fill: #16181f; font-size: 13px; }
                     .title { font-size: 16px; font-weight: 500; }
                     .label { font-weight: 500; }
                     .small { fill: #666; font-size: 11px; }
@@ -1458,7 +1534,7 @@
                 <line class="line" x1="300" y1="68" x2="250" y2="105" />
                 <line class="line" x1="620" y1="68" x2="670" y2="105" />
 
-                <rect class="fsi" x="40" y="105" width="370" height="420" rx="12" />
+                <rect class="accent-box" x="40" y="105" width="370" height="420" rx="12" />
                 <text class="title" x="225" y="135" text-anchor="middle">FSI Evidence Copilot</text>
                 <text class="small" x="225" y="154" text-anchor="middle">small-business lending · KYC · AML review</text>
 
@@ -1482,7 +1558,7 @@
                 <text class="label" x="90" y="518">Output to human reviewer</text>
                 <text class="small" x="90" y="540">draft packet, gaps, risks, source IDs</text>
 
-                <rect class="clinical" x="510" y="105" width="370" height="420" rx="12" />
+                <rect class="alt-box" x="510" y="105" width="370" height="420" rx="12" />
                 <text class="title" x="695" y="135" text-anchor="middle">Clinical Evidence Copilot</text>
                 <text class="small" x="695" y="154" text-anchor="middle">coverage review · medication review · utilization review</text>
 
@@ -1542,8 +1618,6 @@
             need attention. But the business workflow, AWS security posture, and production
             service boundary can remain recognizable.
           </p>
-
-          <!-- ═══════════════════ 4. FSI ═══════════════════ -->
 
           <h2 id="fsi">
             Financial services: the FSI Evidence Copilot
@@ -1686,8 +1760,6 @@
             <figcaption>The FSI Evidence Copilot launch walkthrough: case brief → checklist → cash-flow chart → draft packet, with the decision boundary held throughout.</figcaption>
           </figure>
 
-          <!-- ═══════════════════ 5. CLINICAL ═══════════════════ -->
-
           <h2 id="clinical">
             Healthcare: the Clinical Evidence Copilot
             <a class="heading-anchor" href="#clinical" aria-label="Link to section">#</a>
@@ -1804,8 +1876,6 @@
             <figcaption>Criteria status by review. The useful signal includes what is supported, stale, ambiguous, or missing before the clinician opens the chart.</figcaption>
           </figure>
 
-          <!-- ═══════════════════ 6. PATTERN ═══════════════════ -->
-
           <h2 id="pattern">
             The shared pattern: evidence over decisions
             <a class="heading-anchor" href="#pattern" aria-label="Link to section">#</a>
@@ -1835,8 +1905,6 @@
               can't defend.
             </p>
           </div>
-
-          <!-- ═══════════════════ 7. PRODUCTION ═══════════════════ -->
 
           <h2 id="production">
             From migration to production
@@ -1876,8 +1944,6 @@
             the one slot in it that was always meant to be swappable.
           </p>
 
-          <!-- ═══════════════════ 8. CONCLUSION ═══════════════════ -->
-
           <h2 id="conclusion">
             Conclusion
             <a class="heading-anchor" href="#conclusion" aria-label="Link to section">#</a>
@@ -1905,8 +1971,6 @@
               Want to build with OpenAI on Amazon Bedrock? <a href="https://www.loka.com">Let's connect.</a>
             </p>
           </div>
-
-          <!-- ═══════════════════ FURTHER READING ═══════════════════ -->
 
           <h2 id="references">
             Further reading
@@ -1982,6 +2046,15 @@
               <a href="https://openai.com/index/codex-for-every-role-tool-workflow/">openai.com</a>
             </li>
           </ol>
+
+          <h3>Cite this post</h3>
+          <div class="citation-block"><pre><code>@misc{loka2026frontiermodels,
+  title        = {How Loka Evaluates and Builds with Frontier Models on AWS},
+  author       = {Kalinovski, Petar and Jakimovski, Bojan},
+  year         = {2026},
+  month        = {jun},
+  howpublished = {https://lokahq.github.io/gpt-bedrock-openai-benchmark/blog/}
+}</code></pre></div>
         </article>
 
         <nav class="paginator" aria-label="Post navigation">
@@ -1991,15 +2064,18 @@
 
       <footer class="site-footer">
         Petar Kalinovski &middot; Bojan Jakimovski &middot;
-        <img src="https://cdn.worldvectorlogo.com/logos/loka-1.svg" alt="Loka" class="loka-logo" /> &middot; 2026
+        <svg class="loka-logo" viewBox="0 0 93.054802 32.0476" role="img" aria-label="Loka"><use href="#loka-wordmark" /></svg> &middot; 2026
       </footer>
     </div>
 
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" title="Toggle dark mode">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+  </button>
+
     <button class="back-to-top" id="back-to-top" aria-label="Back to top">&#8593;</button>
 
-    <!-- ═══════════════════ JAVASCRIPT ═══════════════════ -->
     <script>
-      /* ── UI: reading progress, back-to-top, TOC highlight ── */
       (function () {
         var progress = document.getElementById("reading-progress");
         function updateProgress() {
@@ -2014,6 +2090,19 @@
         btn.addEventListener("click", function () {
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
+
+        var themeBtn = document.getElementById("theme-toggle");
+        function syncTheme() {
+          themeBtn.setAttribute("aria-pressed", document.documentElement.getAttribute("data-theme") === "dark" ? "true" : "false");
+        }
+        themeBtn.addEventListener("click", function () {
+          var dark = document.documentElement.getAttribute("data-theme") === "dark";
+          if (dark) { document.documentElement.removeAttribute("data-theme"); }
+          else { document.documentElement.setAttribute("data-theme", "dark"); }
+          try { localStorage.setItem("loka-theme", dark ? "light" : "dark"); } catch (e) {}
+          syncTheme();
+        });
+        syncTheme();
 
         var tocLinks = document.querySelectorAll(".toc-list a");
         var sections = [];
@@ -2059,20 +2148,19 @@
         updateToc();
       })();
 
-      /* ── Charts ── */
       (function () {
         if (typeof Chart === "undefined") return;
 
         var C = {
-          blue: "#1877f2",   /* Loka primary   */
-          amber: "#f7d046",  /* Loka secondary */
-          green: "#0c6f71",  /* Loka fourth    */
-          gray: "#050516",   /* Loka third     */
+          blue: "#1877f2",
+          teal: "#0c6f71",
+          yellow: "#f7d043",
+          black: "#050517",
           red: "#ef4444",
         };
         var FONT = {
           family:
-            "'GT America', -apple-system, 'Segoe UI', 'Helvetica Neue', Helvetica, sans-serif",
+            "'Alliance No.2', 'Archivo', -apple-system, 'Segoe UI', 'Helvetica Neue', Helvetica, sans-serif",
         };
 
         function baseOpts(yLabel, xLabel) {
@@ -2134,7 +2222,6 @@
           },
         };
 
-        /* ── DeepSWE: GPT-5.5 vs Opus 4.8 token efficiency ── */
         var deepsweEl = document.getElementById("chart-deepswe-efficiency");
         if (deepsweEl) {
           new Chart(deepsweEl, {
@@ -2143,8 +2230,8 @@
               datasets: [
                 {
                   label: "GPT-5.5",
-                  borderColor: C.green,
-                  backgroundColor: C.green,
+                  borderColor: C.teal,
+                  backgroundColor: C.teal,
                   showLine: true,
                   borderWidth: 2,
                   pointRadius: 5,
@@ -2225,7 +2312,6 @@
           });
         }
 
-        /* ── Clinical: criteria status by review (stacked horizontal bar) ── */
         var clinicalEl = document.getElementById("chart-clinical");
         if (clinicalEl) {
           new Chart(clinicalEl, {
@@ -2233,8 +2319,8 @@
             data: {
               labels: ["CEC-1003 · Home oxygen", "CEC-1001 · GLP-1 review"],
               datasets: [
-                { label: "Supported", data: [11, 4], backgroundColor: C.green, borderRadius: 3 },
-                { label: "Needs review", data: [4, 2], backgroundColor: C.amber, borderRadius: 3 },
+                { label: "Supported", data: [11, 4], backgroundColor: C.teal, borderRadius: 3 },
+                { label: "Needs review", data: [4, 2], backgroundColor: C.yellow, borderRadius: 3 },
                 { label: "Missing / gap", data: [2, 1], backgroundColor: C.red, borderRadius: 3 },
               ],
             },
@@ -2248,7 +2334,6 @@
           });
         }
 
-        /* ── FSI: Atlas DSCR vs policy threshold ── */
         var dscrEl = document.getElementById("chart-dscr");
         if (dscrEl) {
           new Chart(dscrEl, {
@@ -2282,7 +2367,6 @@
           });
         }
 
-        /* ── FSI: wire-count spike (Atlas vs Northstar) ── */
         var wiresEl = document.getElementById("chart-wires");
         if (wiresEl) {
           new Chart(wiresEl, {
@@ -2303,7 +2387,7 @@
                 {
                   label: "Northstar (AML) wire count",
                   data: [4, 6, 5, 7, 8, 19],
-                  borderColor: C.amber,
+                  borderColor: C.yellow,
                   backgroundColor: "transparent",
                   borderWidth: 2,
                   pointRadius: 3,
@@ -2316,7 +2400,6 @@
           });
         }
 
-        /* ── Benchmark: shared config ── */
         var EFFORTS = ["medium", "high", "xhigh"];
         function benchBarOpts(yLabel, ySuffix) {
           var opts = baseOpts(yLabel, "Reasoning effort");
@@ -2328,7 +2411,6 @@
           return opts;
         }
 
-        /* ── Benchmark: TTFB p50 by effort ── */
         var ttfbEl = document.getElementById("chart-bench-ttfb");
         if (ttfbEl) {
           new Chart(ttfbEl, {
@@ -2337,14 +2419,13 @@
               labels: EFFORTS,
               datasets: [
                 { label: "Bedrock TTFB p50", data: [220, 224, 223], backgroundColor: C.blue, borderRadius: 3 },
-                { label: "OpenAI API TTFB p50", data: [484, 497, 502], backgroundColor: C.gray, borderRadius: 3 },
+                { label: "OpenAI API TTFB p50", data: [484, 497, 502], backgroundColor: C.black, borderRadius: 3 },
               ],
             },
             options: benchBarOpts("Time to first byte (ms)", " ms"),
           });
         }
 
-        /* ── Benchmark: end-to-end latency p50 / p90 by effort ── */
         var e2eEl = document.getElementById("chart-bench-e2e");
         if (e2eEl) {
           new Chart(e2eEl, {
@@ -2353,7 +2434,7 @@
               labels: EFFORTS,
               datasets: [
                 { label: "Bedrock p50", data: [2881, 3455, 3803], backgroundColor: C.blue, borderRadius: 3 },
-                { label: "OpenAI API p50", data: [2859, 3248, 4334], backgroundColor: C.gray, borderRadius: 3 },
+                { label: "OpenAI API p50", data: [2859, 3248, 4334], backgroundColor: C.black, borderRadius: 3 },
                 { label: "Bedrock p90", data: [4369, 4801, 5792], backgroundColor: "rgba(24,119,242,0.35)", borderRadius: 3 },
                 { label: "OpenAI API p90", data: [4908, 5712, 8273], backgroundColor: "rgba(5,5,22,0.35)", borderRadius: 3 },
               ],
@@ -2362,7 +2443,6 @@
           });
         }
 
-        /* ── Benchmark: mean output throughput by effort ── */
         var tpsEl = document.getElementById("chart-bench-tps");
         if (tpsEl) {
           new Chart(tpsEl, {
@@ -2371,14 +2451,13 @@
               labels: EFFORTS,
               datasets: [
                 { label: "Bedrock mean tok/s", data: [47.4, 48.5, 51.8], backgroundColor: C.blue, borderRadius: 3 },
-                { label: "OpenAI API mean tok/s", data: [39.1, 41.3, 39.7], backgroundColor: C.gray, borderRadius: 3 },
+                { label: "OpenAI API mean tok/s", data: [39.1, 41.3, 39.7], backgroundColor: C.black, borderRadius: 3 },
               ],
             },
             options: benchBarOpts("Output throughput (tokens/s)"),
           });
         }
 
-        /* ── Benchmark: quadrant of our six runs (latency vs throughput) ── */
         var benchQuadrantPlugin = {
           id: "benchQuadrantPlugin",
           afterDraw: function (chart) {
@@ -2447,8 +2526,8 @@
                 },
                 {
                   label: "OpenAI API",
-                  borderColor: C.gray,
-                  backgroundColor: C.gray,
+                  borderColor: C.black,
+                  backgroundColor: C.black,
                   pointRadius: 6,
                   pointHoverRadius: 8,
                   data: [
